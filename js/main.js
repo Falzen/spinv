@@ -36,6 +36,7 @@ var btns = {
 
 var missiles = [];
 var enemies = [];
+var bonuses = [];
 var playerFiringInterval;
 
 
@@ -82,6 +83,7 @@ var backgroundBis;
 	document.addEventListener("keyup", keyLetGo);
 
 	spawnEnemies();
+	spawnBonuses();
 }
 
 
@@ -106,14 +108,24 @@ function keyPush(evt) {
         	}
             break;
 
+		// arrow up
+		case 90: dirs.up = true; break; 	
+		// arrow left
+		case 81: dirs.left = true; break; 	
+		// arrow down
+		case 83: dirs.down = true; break; 	
+		// arrow right
+		case 68: dirs.right = true; break; 
+
+
 		// z
-        case 90: dirs.up = true; break;
-        // q
-        case 81: dirs.left = true; break;
-        // s
-        case 83: dirs.down = true; break;
-        // d
-        case 68: dirs.right = true; break;
+		case 38: dirs.arrowUp = true; break;
+		// q
+		case 37: dirs.arrowLeft = true; break;
+		// s
+		case 40: dirs.arrowDown = true; break;
+		// d
+		case 39: dirs.arrowRight = true; break;
     }
 }
 
@@ -136,15 +148,46 @@ function keyLetGo(evt) {
         	btns.action1 = false;
             break;
 
-		// z
+		// arrow up
 		case 90: dirs.up = false; break; 	
-		// q
+		// arrow left
 		case 81: dirs.left = false; break; 	
-		// s
+		// arrow down
 		case 83: dirs.down = false; break; 	
-		// d
+		// arrow right
 		case 68: dirs.right = false; break; 
+
+
+		// z
+		case 38: dirs.arrowUp = false; break; 	
+		// q
+		case 37: dirs.arrowLeft = false; break; 	
+		// s
+		case 40: dirs.arrowDown = false; break; 	
+		// d
+		case 39: dirs.arrowRight = false; break; 
 	}
+}
+
+function actionsManager() {
+	if(
+		btns.action0
+		|| dirs.arrowUp
+	) {
+		startFiring();
+	} else if(wasFiring == true) {
+		stopFiring();
+	}
+
+	if(
+		btns.action1
+		|| dirs.arrowLeft
+	) {
+		speedUpPlayer();
+	} else if(wasPlayerSpeedingUp == true) {
+		speedDownPlayer();
+	}
+
 }
 
 var bgPositions = {
@@ -221,32 +264,35 @@ function drawPlayer() {
     drawAimSight();
 }
 
-var firingRate = 110;
-var firingDelay = firingRate*1;
+var firingRate = 100;
 var isFiring; 
-
+var wasFiring; 
+var firingTimeout = null;
 function startFiring() {
+	if(!isFiring) {
+		firingRate *= 1.1;
+		firingRate = firingRate > 500 ? 500 : firingRate;
 		isFiring = true;
+		wasFiring = true; // 
 		createMissile();
-
-		setTimeout(function() {
-			createMissile();		
+		firingTimeout = setTimeout(function() {
+			isFiring = false;
 		}, firingRate);
+	}
 
-		setTimeout(function() {
-			createMissile();		
-		}, firingRate*2);
-
-	playerFiringInterval = setTimeout(function() {
-		startFiring();
-	}, firingDelay);
-	isFiring = false;
 }
 
 function stopFiring() {
-	clearInterval(playerFiringInterval);
+	firingRate = 100;
 }
-
+var mstats = {
+		x: null,
+		y: null,
+		xd: 0, // x direction
+		w: 6,
+		h: 6,
+		sy: 14 // speed Y axis
+}
 function createMissile(dir) {
 	if(!dir) {
 		dir = 'c';
@@ -254,10 +300,10 @@ function createMissile(dir) {
 	let missile = {
 		x: (pl.x + (pl.w/2) - 3),
 		y: (pl.y + (pl.h/2)),
-		xd: 0, // x direction
-		w: 6,
-		h: 6,
-		sy: 14
+		xd:mstats.xd, // x direction
+		w:mstats.w,
+		h:mstats.h,
+		sy:mstats.sy // speed Y axis
 	};
 	switch(dir) {
 		case 'l': 
@@ -280,7 +326,6 @@ function animateMissile(m) {
 }
 
 function animateEnemy(en) {
-	
 	en.y += en.sy;
 }
 
@@ -288,6 +333,61 @@ function checkMissileOutOfBounds(m, indx) {
 	if((m.y+m.h) < 0) {
 		missiles.splice(indx,1);
 	}
+}
+
+var isPlayerSpeedingUp = false;
+var wasPlayerSpeedingUp = false;
+function speedUpPlayer() {
+	if(!isPlayerSpeedingUp) {
+		isPlayerSpeedingUp = true;
+		wasPlayerSpeedingUp = true;
+		pl.ms *= 2;
+	}
+}
+
+function speedDownPlayer() {
+	isPlayerSpeedingUp = false;
+	wasPlayerSpeedingUp = false;
+	pl.ms /= 2;
+}
+
+var bstats = {
+	x: null,
+	y: null,
+	w: 20,
+	h: 20,
+	sx: 7,
+	sy: 3,
+	type: 1
+}
+function createBonus(data) {
+	let randY = getRandomInt(5, ((canvas.height/2)-ses.h));
+	let bonus = {
+		x: -25,
+		y: randY,
+		w: bstats.w,
+		h: bstats.h,
+		sx: bstats.sx,
+		sy: bstats.sy,
+		type: bstats.type
+	};
+	bonuses.push(bonus);
+}
+
+function animateBonus(b,indx) {
+	b.y += b.sy;
+	b.x += b.sx;
+
+}
+function drawBonuses() {
+
+	context.fillStyle="aquamarine";
+	for(let i=0; i<bonuses.length; i++) {
+		let b = bonuses[i];
+		checkBonusOutOfBounds(b,i);
+		animateBonus(b,i);
+	    context.fillRect(b.x, b.y, b.w, b.h);
+    }
 }
 
 function createEnemy() {
@@ -318,14 +418,15 @@ function drawMissiles() {
 	    context.fillRect(m.x, m.y, m.w, m.h);
     }
 }
+
 function checkEnemiesCollisionWithMissile(en, indw) {
 	for(let j=0; j<missiles.length; j++) {
 		let m = missiles[j];
 		let mmid = (m.x+(m.w/2)); // missile middle
 		if(
 			(
-				en.x < mmid
-				&& (en.x+en.w) > mmid
+				en.x < (m.x+m.w)
+				&& (en.x+en.w) > m.x
 			) 
 			&& (
 				(en.y+en.h) >= m.y
@@ -337,6 +438,9 @@ function checkEnemiesCollisionWithMissile(en, indw) {
 			enemies.splice(indw,1);
 			missiles.splice(j,1);
 		}
+		// X axis check by missile's MIDDLE
+		// en.x < mmid
+		// && (en.x+en.w) > mmid
 	}
 }
 function checkEnemiesCollisionWithPlayer() {
@@ -379,6 +483,15 @@ function checkEnemyOutOfBounds(en, indx) {
 	}
 }
 
+function checkBonusOutOfBounds(b, indx) {
+	if(
+		b.y > canvas.height
+		|| b.x > canvas.width
+	) {
+		bonuses.splice(indx,1);
+	}
+}
+
 function adjustForBoundaries(item) {
 	let pos = {};
 	if(item.x < 0) {
@@ -400,9 +513,10 @@ function update() {
 
 	drawScene();
 	drawPlayer();
-
+	actionsManager();
 	drawMissiles();
 	drawEnemies();
+	drawBonuses();
 
 	writeScore();
 }
@@ -420,5 +534,17 @@ function spawnEnemies() {
 	createEnemy();
 	setTimeout(function() {
 		spawnEnemies();
+		
 	}, enemySpawningTimer);
+}
+
+var bonusSpawningTimer = 1000;
+var isBonusesSpawning = true;
+function spawnBonuses() {
+	if(!isBonusesSpawning) return;
+	createBonus();
+	setTimeout(function() {
+		spawnBonuses();
+		
+	}, bonusSpawningTimer);
 }
