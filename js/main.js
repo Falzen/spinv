@@ -1,113 +1,29 @@
 
-var canvas;
-var friction = 0.99
 
-var settings = {
-	canvasWidth: 450,
-	canvasHeight: 800,
-	score: 200
-}
-
-// player
-var pl = {
-	x: settings.canvasWidth/3,
-	y: settings.canvasHeight - 48,
-	w: 12,
-	h: 24,
-	ms: 4, // MAX speed
-	sx: 0, // speed x
-	sy: 0, // speed y
-}
-
-var dirs = {
-	left: false,
-	up: false,
-	down: false,
-	right: false
-};
-var btns = {
-	space: false,
-	shift: false,
-	action0: false,
-	action1: false,
-	action2: false,
-	action3: false
-}
-
-var missiles = [];
-var enemies = [];
-var bonuses = [];
-var playerFiringInterval;
-
-
-// standardEnemyStats
-var ses = {
-	x: 5,
-	y: 50,
-	w: 24,
-	h: 48,
-	sx: 0,
-	sy: 4,
-	c: 'yellow',
-	pts: 5
-};
-
-var bgs = {
-	t: null, // top
-	l: null, // left
-	d: null, // down
-	r: null // right
-}
-var background;
-var backgroundBis;
-	window.onload = function() {
-	    canvas = document.createElement("canvas");
-	    canvas.width = 450;
-	    canvas.height = 800;
-	    document.body.appendChild(canvas);
-	    context = canvas.getContext("2d");
-
-		bgs.d = new Image();
-		bgs.d.src = "img/bg01.png";
-
-		bgs.t = new Image();
-		bgs.t.src = "img/bg01.png";
-
-
-
-		bgs.d.onload = function(){
-		    setInterval(update, 1000/60);
-		}
-    
-    document.addEventListener('keydown',keyPush);
-	document.addEventListener("keyup", keyLetGo);
-
-	spawnEnemies();
-	spawnBonuses();
-}
-
-
-
-
-var isSprinting = false;
-function keyPush(evt) {
+/***
+ *    ██╗  ██╗███████╗██╗   ██╗    ██████╗  ██████╗ ██╗    ██╗███╗   ██╗
+ *    ██║ ██╔╝██╔════╝╚██╗ ██╔╝    ██╔══██╗██╔═══██╗██║    ██║████╗  ██║
+ *    █████╔╝ █████╗   ╚████╔╝     ██║  ██║██║   ██║██║ █╗ ██║██╔██╗ ██║
+ *    ██╔═██╗ ██╔══╝    ╚██╔╝      ██║  ██║██║   ██║██║███╗██║██║╚██╗██║
+ *    ██║  ██╗███████╗   ██║       ██████╔╝╚██████╔╝╚███╔███╔╝██║ ╚████║
+ *    ╚═╝  ╚═╝╚══════╝   ╚═╝       ╚═════╝  ╚═════╝  ╚══╝╚══╝ ╚═╝  ╚═══╝
+ *                                                                      
+ */
+ function keyPush(evt) {
 	console.log(evt.keyCode);
     switch(evt.keyCode) {
-
         // NUMPAD 0
         case 96: 
 		    if(!btns.action0) {
         		btns.action0 = true;
         	}
             break;
-
         // NUMPAD 1
         case 97: 
 		    if(!isFiring) {
 		    	btns.action1 = true;	
         	}
             break;
-
 		// arrow up
 		case 90: dirs.up = true; break; 	
 		// arrow left
@@ -116,8 +32,6 @@ function keyPush(evt) {
 		case 83: dirs.down = true; break; 	
 		// arrow right
 		case 68: dirs.right = true; break; 
-
-
 		// z
 		case 38: dirs.arrowUp = true; break;
 		// q
@@ -126,28 +40,40 @@ function keyPush(evt) {
 		case 40: dirs.arrowDown = true; break;
 		// d
 		case 39: dirs.arrowRight = true; break;
+		// p - pause
+		case 80: btns.pause = !btns.pause; break;
     }
 }
 
-function writeScore() {
-	context.font = '22px consolas';
-	context.fillStyle = "white";
-	context.fillText(('score: '+ settings.score), 50, 100);
-}
 
-function keyLetGo(evt) {
+
+
+
+
+
+
+
+
+/***
+ *    ██╗  ██╗███████╗██╗   ██╗    ██╗   ██╗██████╗ 
+ *    ██║ ██╔╝██╔════╝╚██╗ ██╔╝    ██║   ██║██╔══██╗
+ *    █████╔╝ █████╗   ╚████╔╝     ██║   ██║██████╔╝
+ *    ██╔═██╗ ██╔══╝    ╚██╔╝      ██║   ██║██╔═══╝ 
+ *    ██║  ██╗███████╗   ██║       ╚██████╔╝██║     
+ *    ╚═╝  ╚═╝╚══════╝   ╚═╝        ╚═════╝ ╚═╝     
+ *                                                  
+ */
+ function keyLetGo(evt) {
     switch(evt.keyCode) {
-
 		// NUMPAD 0
         case 96: 
     		btns.action0 = false;
             break;
-        
+
 		// NUMPAD 1
         case 97: 
         	btns.action1 = false;
             break;
-
 		// arrow up
 		case 90: dirs.up = false; break; 	
 		// arrow left
@@ -156,8 +82,6 @@ function keyLetGo(evt) {
 		case 83: dirs.down = false; break; 	
 		// arrow right
 		case 68: dirs.right = false; break; 
-
-
 		// z
 		case 38: dirs.arrowUp = false; break; 	
 		// q
@@ -169,7 +93,25 @@ function keyLetGo(evt) {
 	}
 }
 
-function actionsManager() {
+
+
+
+
+
+
+
+
+
+/***
+ *     █████╗  ██████╗████████╗██╗ ██████╗ ███╗   ██╗███████╗    ███╗   ███╗ █████╗ ███╗   ██╗ █████╗  ██████╗ ███████╗██████╗ 
+ *    ██╔══██╗██╔════╝╚══██╔══╝██║██╔═══██╗████╗  ██║██╔════╝    ████╗ ████║██╔══██╗████╗  ██║██╔══██╗██╔════╝ ██╔════╝██╔══██╗
+ *    ███████║██║        ██║   ██║██║   ██║██╔██╗ ██║███████╗    ██╔████╔██║███████║██╔██╗ ██║███████║██║  ███╗█████╗  ██████╔╝
+ *    ██╔══██║██║        ██║   ██║██║   ██║██║╚██╗██║╚════██║    ██║╚██╔╝██║██╔══██║██║╚██╗██║██╔══██║██║   ██║██╔══╝  ██╔══██╗
+ *    ██║  ██║╚██████╗   ██║   ██║╚██████╔╝██║ ╚████║███████║    ██║ ╚═╝ ██║██║  ██║██║ ╚████║██║  ██║╚██████╔╝███████╗██║  ██║
+ *    ╚═╝  ╚═╝ ╚═════╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝╚══════╝    ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚═╝
+ *                                                                                                                             
+ */
+ function actionsManager() {
 	if(
 		btns.action0
 		|| dirs.arrowUp
@@ -178,46 +120,78 @@ function actionsManager() {
 	} else if(wasFiring == true) {
 		stopFiring();
 	}
-
 	if(
 		btns.action1
 		|| dirs.arrowLeft
 	) {
 		speedUpPlayer();
-	} else if(wasPlayerSpeedingUp == true) {
+	} else if(pl.wasSpeedingUp == true) {
 		speedDownPlayer();
 	}
-
 }
 
-var bgPositions = {
-	t: {
-		x: 0,
-		y: (-1*settings.canvasHeight)
-	},
-	d: {
-		x: 0,
-		y: 0
+
+
+
+
+
+
+
+
+
+/***
+ *    ███╗   ███╗     ██████╗     ██╗   ██╗    ███████╗    ███╗   ███╗    ███████╗    ███╗   ██╗    ████████╗    ███████╗
+ *    ████╗ ████║    ██╔═══██╗    ██║   ██║    ██╔════╝    ████╗ ████║    ██╔════╝    ████╗  ██║    ╚══██╔══╝    ██╔════╝
+ *    ██╔████╔██║    ██║   ██║    ██║   ██║    █████╗      ██╔████╔██║    █████╗      ██╔██╗ ██║       ██║       ███████╗
+ *    ██║╚██╔╝██║    ██║   ██║    ╚██╗ ██╔╝    ██╔══╝      ██║╚██╔╝██║    ██╔══╝      ██║╚██╗██║       ██║       ╚════██║
+ *    ██║ ╚═╝ ██║    ╚██████╔╝     ╚████╔╝     ███████╗    ██║ ╚═╝ ██║    ███████╗    ██║ ╚████║       ██║       ███████║
+ *    ╚═╝     ╚═╝     ╚═════╝       ╚═══╝      ╚══════╝    ╚═╝     ╚═╝    ╚══════╝    ╚═╝  ╚═══╝       ╚═╝       ╚══════╝
+ *                                                                                                                       
+ */
+ function speedUpPlayer() {
+	if(!pl.isSpeedingUp) {
+		pl.isSpeedingUp = true;
+		pl.wasSpeedingUp = true;
+		pl.ms *= 2;
 	}
 }
+function speedDownPlayer() {
+	pl.isSpeedingUp = false;
+	pl.wasSpeedingUp = false;
+	pl.ms /= 2;
+}
 
-function drawScene() {
+
+
+
+
+
+
+
+
+
+/***
+ *    ██████╗     ██████╗      █████╗     ██╗    ██╗    ██╗    ███╗   ██╗     ██████╗     ███████╗
+ *    ██╔══██╗    ██╔══██╗    ██╔══██╗    ██║    ██║    ██║    ████╗  ██║    ██╔════╝     ██╔════╝
+ *    ██║  ██║    ██████╔╝    ███████║    ██║ █╗ ██║    ██║    ██╔██╗ ██║    ██║  ███╗    ███████╗
+ *    ██║  ██║    ██╔══██╗    ██╔══██║    ██║███╗██║    ██║    ██║╚██╗██║    ██║   ██║    ╚════██║
+ *    ██████╔╝    ██║  ██║    ██║  ██║    ╚███╔███╔╝    ██║    ██║ ╚████║    ╚██████╔╝    ███████║
+ *    ╚═════╝     ╚═╝  ╚═╝    ╚═╝  ╚═╝     ╚══╝╚══╝     ╚═╝    ╚═╝  ╚═══╝     ╚═════╝     ╚══════╝
+ *                                                                                                
+ */
+ function drawScene() {
 	bgPositions.d.y += 1;
 	bgPositions.t.y += 1;
 
-	
 	if(bgPositions.d.y >= canvas.height) {
 		bgPositions.d.y = 0;
 		bgPositions.t.y = -canvas.height;
 	}
-
     context.fillStyle="black";
     context.fillRect(0,0,canvas.width,canvas.height);
 	context.drawImage(bgs.d, bgPositions.d.x, bgPositions.d.y, canvas.width, canvas.height);
 	context.drawImage(bgs.t, bgPositions.t.x, bgPositions.t.y, canvas.width, canvas.height);
-
 }
-
 function drawAimSight() {
 	let grd = context.createLinearGradient(pl.x, pl.y, pl.x, pl.y-500);
 	grd.addColorStop(0,"blue");
@@ -225,7 +199,43 @@ function drawAimSight() {
     context.fillStyle=grd;
     context.fillRect(pl.x + (pl.w/2), 0, 1, pl.y);
 }
+function drawBonuses() {
+	context.fillStyle="#202020";
+	for(let i=0; i<bonuses.length; i++) {
+		let b = bonuses[i];
+		checkBonusOutOfBounds(b,i);
+		animateBonus(b,i);
+	    context.fillRect(b.x, b.y, b.w, b.h);
+	    let effect = '';
+	    switch(b.type) {
+	    	case 'asteroid':
+	    		effect = 'blockMissile'
+	    	break;
+	    }
+	    checkEntityCollisionWithMissiles(b, bonuses, i, effect);
+    }
+}
+function drawMissiles() {
+	context.fillStyle="tomato";
+	for(let i=0; i<missiles.length; i++) {
 
+		let m = missiles[i];
+		checkMissileOutOfBounds(m,i);
+		animateMissile(m,i);
+	    context.fillRect(m.x, m.y, m.w, m.h);
+    }
+}
+function drawEnemies() {
+	for(let i=0; i<enemies.length; i++) {
+		let en = enemies[i];
+		context.fillStyle = en.c;
+		checkEnemyOutOfBounds(en,i);
+		animateEnemy(en);
+
+	    context.fillRect(en.x, en.y, en.w, en.h);
+	    checkEntityCollisionWithMissiles(en, enemies, i, 'hitEntity');
+    }
+}
 function drawPlayer() {
     
     // set position if moving
@@ -264,287 +274,392 @@ function drawPlayer() {
     drawAimSight();
 }
 
-var firingRate = 100;
-var isFiring; 
-var wasFiring; 
-var firingTimeout = null;
-function startFiring() {
-	if(!isFiring) {
-		firingRate *= 1.1;
-		firingRate = firingRate > 500 ? 500 : firingRate;
-		isFiring = true;
-		wasFiring = true; // 
-		createMissile();
-		firingTimeout = setTimeout(function() {
-			isFiring = false;
-		}, firingRate);
-	}
 
-}
 
-function stopFiring() {
-	firingRate = 100;
-}
-var mstats = {
-		x: null,
-		y: null,
-		xd: 0, // x direction
-		w: 6,
-		h: 6,
-		sy: 14 // speed Y axis
-}
-function createMissile(dir) {
-	if(!dir) {
-		dir = 'c';
-	}
-	let missile = {
-		x: (pl.x + (pl.w/2) - 3),
-		y: (pl.y + (pl.h/2)),
-		xd:mstats.xd, // x direction
-		w:mstats.w,
-		h:mstats.h,
-		sy:mstats.sy // speed Y axis
-	};
-	switch(dir) {
-		case 'l': 
-			missile.xd = -1;
-		break;
-		case 'c': 
-			missile.xd = 0;
-		break;
-		case 'r': 
-			missile.xd = 1;
-		break;
-	}
 
-	missiles.push(missile);
-	settings.score -= 1;
-}
 
-function animateMissile(m) {
-	m.y -= m.sy;
-}
 
-function animateEnemy(en) {
-	en.y += en.sy;
-}
 
-function checkMissileOutOfBounds(m, indx) {
-	if((m.y+m.h) < 0) {
-		missiles.splice(indx,1);
-	}
-}
 
-var isPlayerSpeedingUp = false;
-var wasPlayerSpeedingUp = false;
-function speedUpPlayer() {
-	if(!isPlayerSpeedingUp) {
-		isPlayerSpeedingUp = true;
-		wasPlayerSpeedingUp = true;
-		pl.ms *= 2;
-	}
-}
 
-function speedDownPlayer() {
-	isPlayerSpeedingUp = false;
-	wasPlayerSpeedingUp = false;
-	pl.ms /= 2;
-}
 
-var bstats = {
-	x: null,
-	y: null,
-	w: 20,
-	h: 20,
-	sx: 7,
-	sy: 3,
-	type: 1
-}
-function createBonus(data) {
-	let randY = getRandomInt(5, ((canvas.height/2)-ses.h));
-	let bonus = {
-		x: -25,
-		y: randY,
-		w: bstats.w,
-		h: bstats.h,
-		sx: bstats.sx,
-		sy: bstats.sy,
-		type: bstats.type
-	};
-	bonuses.push(bonus);
-}
-
-function animateBonus(b,indx) {
-	b.y += b.sy;
-	b.x += b.sx;
-
-}
-function drawBonuses() {
-
-	context.fillStyle="aquamarine";
-	for(let i=0; i<bonuses.length; i++) {
-		let b = bonuses[i];
-		checkBonusOutOfBounds(b,i);
-		animateBonus(b,i);
-	    context.fillRect(b.x, b.y, b.w, b.h);
+    /***
+     *    ███████╗    ██╗    ██████╗     ██╗    ███╗   ██╗     ██████╗ 
+     *    ██╔════╝    ██║    ██╔══██╗    ██║    ████╗  ██║    ██╔════╝ 
+     *    █████╗      ██║    ██████╔╝    ██║    ██╔██╗ ██║    ██║  ███╗
+     *    ██╔══╝      ██║    ██╔══██╗    ██║    ██║╚██╗██║    ██║   ██║
+     *    ██║         ██║    ██║  ██║    ██║    ██║ ╚████║    ╚██████╔╝
+     *    ╚═╝         ╚═╝    ╚═╝  ╚═╝    ╚═╝    ╚═╝  ╚═══╝     ╚═════╝ 
+     *                                                                 
+     */
+     function startFiring() {
+    	if(!isFiring) {
+    		firingRate *= 1.1;
+    		firingRate = firingRate > 500 ? 500 : firingRate;
+    		isFiring = true;
+    		wasFiring = true; // 
+    		createMissile();
+    		firingTimeout = setTimeout(function() {
+    			isFiring = false;
+    		}, firingRate);
+    	}
     }
-}
-
-function createEnemy() {
-	let randX = getRandomInt(5, ((canvas.width-5)-ses.w));
-	let enemy = {
-		ox: randX,
-		x: randX,
-		oy: ses.y,
-		y: ses.y,
-		w: ses.w,
-		h: ses.h,
-		sx: ses.sx,
-		sy: getRandomInt(ses.sy-2, ses.sy+2),
-		c: ses.c,
-		pts: ses.pts
-	};
-	enemies.push(enemy);
-
-}
-
-function drawMissiles() {
-	context.fillStyle="tomato";
-	for(let i=0; i<missiles.length; i++) {
-	
-		let m = missiles[i];
-		checkMissileOutOfBounds(m,i);
-		animateMissile(m,i);
-	    context.fillRect(m.x, m.y, m.w, m.h);
+    function stopFiring() {
+    	firingRate = 100;
     }
-}
 
-function checkEnemiesCollisionWithMissile(en, indw) {
-	for(let j=0; j<missiles.length; j++) {
-		let m = missiles[j];
-		let mmid = (m.x+(m.w/2)); // missile middle
-		if(
-			(
-				en.x < (m.x+m.w)
-				&& (en.x+en.w) > m.x
-			) 
-			&& (
-				(en.y+en.h) >= m.y
-				&& en.y <= (m.y+m.h)
-			)
 
-		) {
-			settings.score += en.pts;
-			enemies.splice(indw,1);
-			missiles.splice(j,1);
+
+
+
+
+
+
+
+
+    /***
+     *     ██████╗    ██████╗     ███████╗     █████╗     ████████╗    ██╗     ██████╗     ███╗   ██╗    ███████╗
+     *    ██╔════╝    ██╔══██╗    ██╔════╝    ██╔══██╗    ╚══██╔══╝    ██║    ██╔═══██╗    ████╗  ██║    ██╔════╝
+     *    ██║         ██████╔╝    █████╗      ███████║       ██║       ██║    ██║   ██║    ██╔██╗ ██║    ███████╗
+     *    ██║         ██╔══██╗    ██╔══╝      ██╔══██║       ██║       ██║    ██║   ██║    ██║╚██╗██║    ╚════██║
+     *    ╚██████╗    ██║  ██║    ███████╗    ██║  ██║       ██║       ██║    ╚██████╔╝    ██║ ╚████║    ███████║
+     *     ╚═════╝    ╚═╝  ╚═╝    ╚══════╝    ╚═╝  ╚═╝       ╚═╝       ╚═╝     ╚═════╝     ╚═╝  ╚═══╝    ╚══════╝
+     *                                                                                                           
+     */
+     function createMissile(dir) {
+    	if(!dir) {
+    		dir = 'c';
+    	}
+    	let missile = {
+    		x: (pl.x + (pl.w/2) - 3),
+    		y: (pl.y + (pl.h/2)),
+    		xd:mstats.xd, // x direction
+    		w:mstats.w,
+    		h:mstats.h,
+    		sy:mstats.sy // speed Y axis
+    	};
+    	switch(dir) {
+    		case 'l': 
+    			missile.xd = -1;
+    		break;
+    		case 'c': 
+    			missile.xd = 0;
+    		break;
+    		case 'r': 
+    			missile.xd = 1;
+    		break;
+    	}
+    	missiles.push(missile);
+    	settings.score -= 1;
+    }
+    function createBonus() {
+    	let b = bonusesMap.get('asteroid');
+    	let randY = getRandomInt(5, ((canvas.height/3)-ses.h));
+    	let randSpeedX = getRandomInt(b.sx[0], b.sx[1]);
+    	let randSpeedY = getRandomInt(b.sy[0], b.sy[1]);
+    	let bonus = {
+    		x: -25,
+    		y: randY,
+    		w: b.w,
+    		h: b.h,
+    		sx: randSpeedX,
+    		sy: randSpeedY,
+			dirMod: 1,
+    		type: b.type
+    	};
+    	bonuses.push(bonus);
+    }
+    function createEnemy() {
+    	let randX = getRandomInt(5, ((canvas.width-5)-ses.w));
+    	let enemy = {
+    		ox: randX,
+    		x: randX,
+    		oy: ses.y,
+    		y: ses.y,
+    		w: ses.w,
+    		h: ses.h,
+    		sx: ses.sx,
+    		sy: getRandomInt(ses.sy-2, ses.sy+2),
+    		c: ses.c,
+    		pts: ses.pts
+    	};
+    	enemies.push(enemy);
+    }
+
+
+
+
+
+
+
+
+
+
+    /***
+     *     █████╗     ███╗   ██╗    ██╗    ███╗   ███╗     █████╗     ████████╗    ██╗     ██████╗     ███╗   ██╗    ███████╗
+     *    ██╔══██╗    ████╗  ██║    ██║    ████╗ ████║    ██╔══██╗    ╚══██╔══╝    ██║    ██╔═══██╗    ████╗  ██║    ██╔════╝
+     *    ███████║    ██╔██╗ ██║    ██║    ██╔████╔██║    ███████║       ██║       ██║    ██║   ██║    ██╔██╗ ██║    ███████╗
+     *    ██╔══██║    ██║╚██╗██║    ██║    ██║╚██╔╝██║    ██╔══██║       ██║       ██║    ██║   ██║    ██║╚██╗██║    ╚════██║
+     *    ██║  ██║    ██║ ╚████║    ██║    ██║ ╚═╝ ██║    ██║  ██║       ██║       ██║    ╚██████╔╝    ██║ ╚████║    ███████║
+     *    ╚═╝  ╚═╝    ╚═╝  ╚═══╝    ╚═╝    ╚═╝     ╚═╝    ╚═╝  ╚═╝       ╚═╝       ╚═╝     ╚═════╝     ╚═╝  ╚═══╝    ╚══════╝
+     *                                                                                                                       
+     */
+     function animateMissile(m) {
+    	m.y -= m.sy;
+    }
+    function animateEnemy(en) {
+    	en.y += en.sy;
+    }
+    function animateBonus(b,indx) {
+    	if(b.type == 'asteroid') {
+    		if(
+    			(b.x+b.w)+b.sx > canvas.width
+    			// || (b.x+b.sx) < 0 // no rebund off the left wall
+			) {
+    			b.dirMod *= -1;
+    		}
+    	}
+    	b.y += b.sy;
+		b.x += (b.sx*b.dirMod);
+
+    }
+
+
+
+
+
+
+
+
+
+
+    /***
+     *    ██████╗     ███████╗    ████████╗    ███████╗     ██████╗    ████████╗    ██╗     ██████╗     ███╗   ██╗    ███████╗
+     *    ██╔══██╗    ██╔════╝    ╚══██╔══╝    ██╔════╝    ██╔════╝    ╚══██╔══╝    ██║    ██╔═══██╗    ████╗  ██║    ██╔════╝
+     *    ██║  ██║    █████╗         ██║       █████╗      ██║            ██║       ██║    ██║   ██║    ██╔██╗ ██║    ███████╗
+     *    ██║  ██║    ██╔══╝         ██║       ██╔══╝      ██║            ██║       ██║    ██║   ██║    ██║╚██╗██║    ╚════██║
+     *    ██████╔╝    ███████╗       ██║       ███████╗    ╚██████╗       ██║       ██║    ╚██████╔╝    ██║ ╚████║    ███████║
+     *    ╚═════╝     ╚══════╝       ╚═╝       ╚══════╝     ╚═════╝       ╚═╝       ╚═╝     ╚═════╝     ╚═╝  ╚═══╝    ╚══════╝
+     *                                                                                                                        
+     */
+     function checkMissileOutOfBounds(m, indx) {
+    	if((m.y+m.h) < 0) {
+    		missiles.splice(indx,1);
+    	}
+    }
+    function checkEntityCollisionWithMissiles(entity, entities, indw, effect) {
+    	for(let j=0; j<missiles.length; j++) {
+    		let m = missiles[j];
+    		let mmid = (m.x+(m.w/2)); // missile middle
+    		if(
+    			(
+    				entity.x < (m.x+m.w)
+    				&& (entity.x+entity.w) > m.x
+    			) 
+    			&& (
+    				(entity.y+entity.h) >= m.y
+    				&& entity.y <= (m.y+m.h)
+    			)
+    		) {
+    				debugger;
+    			if(effect == 'hitEntity') {
+    				settings.score += entity.pts;
+    				entities.splice(indw,1);
+    				missiles.splice(j,1);
+    			}
+    			if(effect == 'blockMissile') {
+    				missiles.splice(j,1);
+    			}
+    		}
+    		// X axis check by missile's MIDDLE
+    		// entity.x < mmid
+    		// && (entity.x+entity.w) > mmid
+    	}
+    }
+    function checkEnemiesCollisionWithPlayer() {
+    	for(let j=0; j<enemies.length; j++) {
+    		let en = enemies[j];
+    		if(
+    			(
+    				en.x < (pl.x + pl.w) 
+    				&& (en.x + en.w) > pl.x
+    			) 
+    			&& 
+    			(
+    				en.y < (pl.y + pl.h) 
+    				&& (en.y + en.h) > pl.y
+    			) 
+    		) {
+
+    			enemies.splice(j,1);
+    		}
+    	}
+    }
+    function checkEnemyOutOfBounds(en, indx) {
+    	if(en.y > canvas.height) {
+    		enemies.splice(indx,1);
+    	}
+    }
+    function checkBonusOutOfBounds(b, indx) {
+    	if(
+    		b.y > canvas.height
+    		|| b.x > canvas.width
+    	) {
+    		bonuses.splice(indx,1);
+    	}
+    }
+    function adjustForBoundaries(item) {
+    	let pos = {};
+    	if(item.x < 0) {
+    		item.x = 0;
+    	} 
+    	else if(item.x > (canvas.width - item.w)) {
+    		item.x = (canvas.width - item.w);
+    	}
+    	if(item.y < 0) {
+    		item.y = 0;
+    	} 
+    	else if(item.y > (canvas.height - item.h)) {
+    		item.y = (canvas.height - item.h);
+    	}
+    	return item;
+    }
+
+
+
+
+
+
+
+
+
+
+    /***
+     *    ███████╗    ██████╗      █████╗     ██╗    ██╗    ███╗   ██╗            ██╗          ██████╗      ██████╗     ██████╗     ███████╗
+     *    ██╔════╝    ██╔══██╗    ██╔══██╗    ██║    ██║    ████╗  ██║            ██║         ██╔═══██╗    ██╔═══██╗    ██╔══██╗    ██╔════╝
+     *    ███████╗    ██████╔╝    ███████║    ██║ █╗ ██║    ██╔██╗ ██║            ██║         ██║   ██║    ██║   ██║    ██████╔╝    ███████╗
+     *    ╚════██║    ██╔═══╝     ██╔══██║    ██║███╗██║    ██║╚██╗██║            ██║         ██║   ██║    ██║   ██║    ██╔═══╝     ╚════██║
+     *    ███████║    ██║         ██║  ██║    ╚███╔███╔╝    ██║ ╚████║            ███████╗    ╚██████╔╝    ╚██████╔╝    ██║         ███████║
+     *    ╚══════╝    ╚═╝         ╚═╝  ╚═╝     ╚══╝╚══╝     ╚═╝  ╚═══╝            ╚══════╝     ╚═════╝      ╚═════╝     ╚═╝         ╚══════╝
+     *                                                                                                                                      
+     */
+     function spawnEnemies() {
+    	if(!isEnemiesSpawning) return;
+    	if(!btns.pause) {
+    		createEnemy();
 		}
-		// X axis check by missile's MIDDLE
-		// en.x < mmid
-		// && (en.x+en.w) > mmid
-	}
-}
-function checkEnemiesCollisionWithPlayer() {
-	for(let j=0; j<enemies.length; j++) {
-		let en = enemies[j];
-		if(
-			(
-				en.x < (pl.x + pl.w) 
-				&& (en.x + en.w) > pl.x
-			) 
-			&& 
-			(
-				en.y < (pl.y + pl.h) 
-				&& (en.y + en.h) > pl.y
-			) 
+    	setTimeout(function() {
+    		spawnEnemies();
 
-		) {
-			
-			enemies.splice(j,1);
-		}
-	}
-}
-
-function drawEnemies() {
-	for(let i=0; i<enemies.length; i++) {
-		let en = enemies[i];
-		context.fillStyle = en.c;
-		checkEnemyOutOfBounds(en,i);
-		animateEnemy(en);
-		
-	    context.fillRect(en.x, en.y, en.w, en.h);
-
-	    checkEnemiesCollisionWithMissile(en,i);
+    	}, enemySpawningTimer);
     }
-}
+    function spawnBonuses() {
+    	if(!isBonusesSpawning) return;
+    	if(!btns.pause) {
+    		createBonus();
+		}
+    	setTimeout(function() {
+    		spawnBonuses();
 
-function checkEnemyOutOfBounds(en, indx) {
-	if(en.y > canvas.height) {
-		enemies.splice(indx,1);
-	}
-}
-
-function checkBonusOutOfBounds(b, indx) {
-	if(
-		b.y > canvas.height
-		|| b.x > canvas.width
-	) {
-		bonuses.splice(indx,1);
-	}
-}
-
-function adjustForBoundaries(item) {
-	let pos = {};
-	if(item.x < 0) {
-		item.x = 0;
-	} 
-	else if(item.x > (canvas.width - item.w)) {
-		item.x = (canvas.width - item.w);
-	}
-
-	if(item.y < 0) {
-		item.y = 0;
-	} 
-	else if(item.y > (canvas.height - item.h)) {
-		item.y = (canvas.height - item.h);
-	}
-	return item;
-}
-function update() {
-
-	drawScene();
-	drawPlayer();
-	actionsManager();
-	drawMissiles();
-	drawEnemies();
-	drawBonuses();
-
-	writeScore();
-}
+    	}, bonusSpawningTimer);
+    }
 
 
-// utils
-function getRandomInt(min, max) {
-    return min + Math.floor(Math.random() * (max - min + 1));
-}
 
-var enemySpawningTimer = 800;
-var isEnemiesSpawning = true;
-function spawnEnemies() {
-	if(!isEnemiesSpawning) return;
-	createEnemy();
-	setTimeout(function() {
-		spawnEnemies();
-		
-	}, enemySpawningTimer);
-}
 
-var bonusSpawningTimer = 1000;
-var isBonusesSpawning = true;
-function spawnBonuses() {
-	if(!isBonusesSpawning) return;
-	createBonus();
-	setTimeout(function() {
-		spawnBonuses();
-		
-	}, bonusSpawningTimer);
-}
+
+
+
+
+
+
+    /***
+     *    ██╗   ██╗    ████████╗    ██╗    ██╗         ███████╗
+     *    ██║   ██║    ╚══██╔══╝    ██║    ██║         ██╔════╝
+     *    ██║   ██║       ██║       ██║    ██║         ███████╗
+     *    ██║   ██║       ██║       ██║    ██║         ╚════██║
+     *    ╚██████╔╝       ██║       ██║    ███████╗    ███████║
+     *     ╚═════╝        ╚═╝       ╚═╝    ╚══════╝    ╚══════╝
+     *                                                         
+     */
+     function getRandomInt(min, max) {
+        return min + Math.floor(Math.random() * (max - min + 1));
+    }
+    function writeScore() {
+    	context.font = '22px consolas';
+    	context.fillStyle = "white";
+    	context.fillText(('score: '+ settings.score), 50, 100);
+    }
+
+
+
+
+
+
+
+
+
+
+    /***
+     *    ███╗   ███╗     █████╗     ██╗    ███╗   ██╗            ██╗          ██████╗      ██████╗     ██████╗     
+     *    ████╗ ████║    ██╔══██╗    ██║    ████╗  ██║            ██║         ██╔═══██╗    ██╔═══██╗    ██╔══██╗    
+     *    ██╔████╔██║    ███████║    ██║    ██╔██╗ ██║            ██║         ██║   ██║    ██║   ██║    ██████╔╝    
+     *    ██║╚██╔╝██║    ██╔══██║    ██║    ██║╚██╗██║            ██║         ██║   ██║    ██║   ██║    ██╔═══╝     
+     *    ██║ ╚═╝ ██║    ██║  ██║    ██║    ██║ ╚████║            ███████╗    ╚██████╔╝    ╚██████╔╝    ██║         
+     *    ╚═╝     ╚═╝    ╚═╝  ╚═╝    ╚═╝    ╚═╝  ╚═══╝            ╚══════╝     ╚═════╝      ╚═════╝     ╚═╝         
+     *                                                                                                              
+     */
+     function update() {
+     	if(!btns.pause) {
+	    	drawScene();
+	    	drawPlayer();
+	    	actionsManager();
+	    	drawMissiles();
+	    	drawEnemies();
+	    	drawBonuses();
+	    	writeScore();
+	    }
+    }
+
+
+
+
+
+
+
+
+
+
+    /***
+     *    ██╗    ███╗   ██╗    ██╗    ████████╗
+     *    ██║    ████╗  ██║    ██║    ╚══██╔══╝
+     *    ██║    ██╔██╗ ██║    ██║       ██║   
+     *    ██║    ██║╚██╗██║    ██║       ██║   
+     *    ██║    ██║ ╚████║    ██║       ██║   
+     *    ╚═╝    ╚═╝  ╚═══╝    ╚═╝       ╚═╝   
+     *                                         
+     */
+     window.onload = function() {
+    	// injecting DOM
+        canvas = document.createElement("canvas");
+        canvas.width = 450;
+        canvas.height = 800;
+        document.body.appendChild(canvas);
+        context = canvas.getContext("2d");
+        // background init for panning loop
+    	bgs.d = new Image(); // down
+    	bgs.d.src = "img/bg01.png";
+    	bgs.t = new Image(); // top
+    	bgs.t.src = "img/bg01.png";
+    	// game loop starts when background ready
+    	bgs.d.onload = function(){
+    	    updateLoop = setInterval(update, 1000/60);
+    	}
+
+        // init event listeners
+        document.addEventListener('keydown',keyPush);
+    	document.addEventListener("keyup", keyLetGo);
+    	// init creation loops
+    	spawnEnemies();
+    	spawnBonuses();
+    }
