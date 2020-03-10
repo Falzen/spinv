@@ -60,8 +60,12 @@ var isBonusesSpawning = true;
 	sx: 0, // speed x
 	sy: 0, // speed y
 	isSpeedingUp: false,
-	wasSpeedingUp: false
+	wasSpeedingUp: false,
+	isRageAvailable: false
 }
+
+    var fullRageWidth =  1*(getComputedStyle(document.getElementById('rageBar')).width.split('px')[0]);
+ 
 
 
 

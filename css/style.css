@@ -1,5 +1,74 @@
 
-canvas {
-	background-image: url('../img/bg01.png');
-	background-repeat: repeat;
+
+body {
+	margin: 0;
+	background: #3c3c3c;
+}
+
+#gameContainer{
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: center;
+
+    margin-top: 24px;
+}
+#instructions {
+    color: lightgrey;
+}
+#instructions table#keys {
+	margin: 100px 0 0 auto;
+}
+table#keys td:first-child {
+	padding-right: 35px;
+}
+table#keys td:last-child {
+	text-align: center;
+	font-weight: bold;
+}
+#game {
+	position: relative;
+}
+
+#fog {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: transparent;
+	transition: all 0.5s ease;
+}
+#fog.isHurt {
+	background-color: rgba(255,0,0,0.1);
+    box-shadow: 0 0 15px 6px red inset;
+}
+
+
+#information {
+	padding-right: 16px;
+}
+
+#shipStatus p {
+	margin-bottom: 0;
+	text-align: right;
+	padding-right: 32px;
+}
+#healthBar,
+#rageBar {
+	width: 200px;
+	height: 16px;
+	box-shadow: 0 0 0 1px white;
+}
+
+
+.statAmount {
+	height: 100%;
+}
+#healthAmount.statAmount {
+	width: 100%;
+	background-color: red;
+}
+#rageAmount.statAmount {
+	width: 10%;
+	background-color: green;
 }

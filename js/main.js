@@ -10,7 +10,7 @@
  *                                                                      
  */
  function keyPush(evt) {
-	console.log(evt.keyCode);
+	//console.log(evt.keyCode);
     switch(evt.keyCode) {
         // NUMPAD 0
         case 96: 
@@ -127,6 +127,15 @@
 		speedUpPlayer();
 	} else if(pl.wasSpeedingUp == true) {
 		speedDownPlayer();
+	}
+
+	if(
+		dirs.arrowDown
+		&& pl.isRageAvailable == true
+	) {
+		pl.isRageAvailable = false;
+		resetRage();
+		alert('bim');
 	}
 }
 
@@ -427,6 +436,21 @@ function drawPlayer() {
 		b.x += (b.sx*b.dirMod);
 
     }
+    
+var domRageAmount = document.getElementById('rageAmount');
+    function upRage(amount) {
+    	if(amount == null) amount = 35;
+    	let currentRageWidth = 1*(getComputedStyle(domRageAmount).width.split('px')[0]);
+    	currentRageWidth += amount;
+    	if(currentRageWidth >= fullRageWidth) {
+    		currentRageWidth = fullRageWidth;
+		 	pl.isRageAvailable = true;
+    	}
+    	domRageAmount.style.width = currentRageWidth + 'px';
+    }
+    function resetRage(amount) {
+		domRageAmount.style.width = '0px';
+    }
 
 
 
@@ -471,6 +495,7 @@ function drawPlayer() {
     			)
     		) {
     			if(effect == 'hitEntity') {
+    				upRage();
     				settings.score += entity.pts;
     				entities.splice(indw,1);
     				missiles.splice(j,1);
@@ -668,7 +693,7 @@ function drawPlayer() {
         canvas = document.createElement("canvas");
         canvas.width = 450;
         canvas.height = 800;
-        document.body.appendChild(canvas);
+        document.getElementById('game').appendChild(canvas);
         context = canvas.getContext("2d");
         // background init for panning loop
     	bgs.d = new Image(); // down
