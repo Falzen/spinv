@@ -31,7 +31,7 @@ var friction = 0.89
 var enemySpawningTimer = 800;
 var isEnemiesSpawning = true;
 // spawnBonuses
-var bonusSpawningTimer = 333;
+var bonusSpawningTimer = 1200;
 var isBonusesSpawning = true;
 
 
@@ -187,7 +187,7 @@ var ses = {
 	h: 48,
 	sx: 0,
 	sy: 4,
-	c: 'yellow',
+	c: 'tomato',
 	pts: 5
 };
 
@@ -303,8 +303,8 @@ bonusesMap.set(
 		y: null,
 		w: 30,
 		h: 30,
-		sx: [2,4],
-		sy: [1,2],
+		sx: [1,6],
+		sy: [1,5],
 		dirMod: 1, // direction modifier : 1 or -1
 		type: 'asteroid'
 	}

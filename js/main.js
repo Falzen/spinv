@@ -200,7 +200,7 @@ function drawAimSight() {
     context.fillRect(pl.x + (pl.w/2), 0, 1, pl.y);
 }
 function drawBonuses() {
-	context.fillStyle="#202020";
+	context.fillStyle="red";
 	for(let i=0; i<bonuses.length; i++) {
 		let b = bonuses[i];
 		checkBonusOutOfBounds(b,i);
@@ -213,6 +213,9 @@ function drawBonuses() {
 	    	break;
 	    }
 	    checkEntityCollisionWithMissiles(b, bonuses, i, effect);
+	    if(checkEntityCollisionWithPlayer(b)) {
+
+	    }
     }
 }
 function drawMissiles() {
@@ -265,7 +268,7 @@ function drawPlayer() {
 	    pl.sy *= friction;
 	    pl.x += pl.sx
 	    pl.y += pl.sy
-		checkEnemiesCollisionWithPlayer();
+		checkEntitiesCollisionWithPlayer(enemies);
 	    pl = adjustForBoundaries(pl);
     }  
 
@@ -354,7 +357,7 @@ function drawPlayer() {
     }
     function createBonus() {
     	let b = bonusesMap.get('asteroid');
-    	let randY = getRandomInt(5, ((canvas.height/3)-ses.h));
+    	let randY = getRandomInt((-1*(canvas.height/3)), ((canvas.height/3)-ses.h));
     	let randSpeedX = getRandomInt(b.sx[0], b.sx[1]);
     	let randSpeedY = getRandomInt(b.sy[0], b.sy[1]);
     	let bonus = {
@@ -395,6 +398,7 @@ function drawPlayer() {
 
 
 
+
     /***
      *     █████╗     ███╗   ██╗    ██╗    ███╗   ███╗     █████╗     ████████╗    ██╗     ██████╗     ███╗   ██╗    ███████╗
      *    ██╔══██╗    ████╗  ██║    ██║    ████╗ ████║    ██╔══██╗    ╚══██╔══╝    ██║    ██╔═══██╗    ████╗  ██║    ██╔════╝
@@ -414,7 +418,7 @@ function drawPlayer() {
     	if(b.type == 'asteroid') {
     		if(
     			(b.x+b.w)+b.sx > canvas.width
-    			// || (b.x+b.sx) < 0 // no rebund off the left wall
+    			 || (b.dirMod == -1 && (b.x+b.sx) < 0) // no rebund off the left wall
 			) {
     			b.dirMod *= -1;
     		}
@@ -423,6 +427,11 @@ function drawPlayer() {
 		b.x += (b.sx*b.dirMod);
 
     }
+
+
+
+
+
 
 
 
@@ -461,7 +470,6 @@ function drawPlayer() {
     				&& entity.y <= (m.y+m.h)
     			)
     		) {
-    				debugger;
     			if(effect == 'hitEntity') {
     				settings.score += entity.pts;
     				entities.splice(indw,1);
@@ -476,24 +484,41 @@ function drawPlayer() {
     		// && (entity.x+entity.w) > mmid
     	}
     }
-    function checkEnemiesCollisionWithPlayer() {
-    	for(let j=0; j<enemies.length; j++) {
-    		let en = enemies[j];
+    function checkEntitiesCollisionWithPlayer(entities) {
+    	for(let j=0; j<entities.length; j++) {
+    		let entity = entities[j];
     		if(
     			(
-    				en.x < (pl.x + pl.w) 
-    				&& (en.x + en.w) > pl.x
+    				entity.x < (pl.x + pl.w) 
+    				&& (entity.x + entity.w) > pl.x
     			) 
     			&& 
     			(
-    				en.y < (pl.y + pl.h) 
-    				&& (en.y + en.h) > pl.y
+    				entity.y < (pl.y + pl.h) 
+    				&& (entity.y + entity.h) > pl.y
     			) 
     		) {
 
-    			enemies.splice(j,1);
+    			entities.splice(j,1);
     		}
     	}
+    }
+    function checkEntityCollisionWithPlayer(entity) {
+		if(
+			(
+				entity.x < (pl.x + pl.w) 
+				&& (entity.x + entity.w) > pl.x
+			) 
+			&& 
+			(
+				entity.y < (pl.y + pl.h) 
+				&& (entity.y + entity.h) > pl.y
+			) 
+		) {
+			return true;
+		}
+	
+		return false;
     }
     function checkEnemyOutOfBounds(en, indx) {
     	if(en.y > canvas.height) {
@@ -503,13 +528,12 @@ function drawPlayer() {
     function checkBonusOutOfBounds(b, indx) {
     	if(
     		b.y > canvas.height
-    		|| b.x > canvas.width
+    		// || b.x > canvas.width // bouncing against walls
     	) {
     		bonuses.splice(indx,1);
     	}
     }
     function adjustForBoundaries(item) {
-    	let pos = {};
     	if(item.x < 0) {
     		item.x = 0;
     	} 
