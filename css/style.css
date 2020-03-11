@@ -22,7 +22,6 @@ table#keys td:first-child {
 	padding-right: 35px;
 }
 table#keys td:last-child {
-	text-align: center;
 	font-weight: bold;
 }
 #game {
@@ -71,4 +70,14 @@ table#keys td:last-child {
 #rageAmount.statAmount {
 	width: 10%;
 	background-color: green;
+}
+td {
+	
+	text-align: center;
+}
+td.left {
+	text-align: left;
+}
+td.right {
+	text-align: right;
 }

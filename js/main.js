@@ -1,4 +1,9 @@
 
+// TODOs
+// invincible 1s after being hit
+// better collision detection (wtf not hurt when collision from the side)
+// collision checks should return booleans
+
 
 /***
  *    ██╗  ██╗███████╗██╗   ██╗    ██████╗  ██████╗ ██╗    ██╗███╗   ██╗
@@ -113,8 +118,7 @@
  */
  function actionsManager() {
 	if(
-		btns.action0
-		|| dirs.arrowUp
+		dirs.arrowUp
 	) {
 		startFiring();
     
@@ -137,345 +141,6 @@
         carpetBombing();
 	}
 }
-
-
-
-
-
-
-
-
-
-
-/***
- *    ███╗   ███╗     ██████╗     ██╗   ██╗    ███████╗    ███╗   ███╗    ███████╗    ███╗   ██╗    ████████╗    ███████╗
- *    ████╗ ████║    ██╔═══██╗    ██║   ██║    ██╔════╝    ████╗ ████║    ██╔════╝    ████╗  ██║    ╚══██╔══╝    ██╔════╝
- *    ██╔████╔██║    ██║   ██║    ██║   ██║    █████╗      ██╔████╔██║    █████╗      ██╔██╗ ██║       ██║       ███████╗
- *    ██║╚██╔╝██║    ██║   ██║    ╚██╗ ██╔╝    ██╔══╝      ██║╚██╔╝██║    ██╔══╝      ██║╚██╗██║       ██║       ╚════██║
- *    ██║ ╚═╝ ██║    ╚██████╔╝     ╚████╔╝     ███████╗    ██║ ╚═╝ ██║    ███████╗    ██║ ╚████║       ██║       ███████║
- *    ╚═╝     ╚═╝     ╚═════╝       ╚═══╝      ╚══════╝    ╚═╝     ╚═╝    ╚══════╝    ╚═╝  ╚═══╝       ╚═╝       ╚══════╝
- *                                                                                                                       
- */
- function speedUpPlayer() {
-	if(!pl.isSpeedingUp) {
-		pl.isSpeedingUp = true;
-		pl.wasSpeedingUp = true;
-		pl.ms *= 2;
-	}
-}
-function speedDownPlayer() {
-	pl.isSpeedingUp = false;
-	pl.wasSpeedingUp = false;
-	pl.ms /= 2;
-}
-
-
-
-
-
-
-
-/***
- *    ███████╗    ████████╗     █████╗     ████████╗    ███████╗
- *    ██╔════╝    ╚══██╔══╝    ██╔══██╗    ╚══██╔══╝    ██╔════╝
- *    ███████╗       ██║       ███████║       ██║       ███████╗
- *    ╚════██║       ██║       ██╔══██║       ██║       ╚════██║
- *    ███████║       ██║       ██║  ██║       ██║       ███████║
- *    ╚══════╝       ╚═╝       ╚═╝  ╚═╝       ╚═╝       ╚══════╝
- *                                                              
- */
-    
-
-    function upRage(amount) {
-        if(!amount) amount = 35;
-        let currentRageWidth = 1*(getComputedStyle(document.getElementById('rageAmount')).width.split('px')[0]);
-        currentRageWidth += amount;
-        if(currentRageWidth >= fullRageWidth) {
-            currentRageWidth = fullRageWidth;
-            pl.isRageAvailable = true;
-        }
-        document.getElementById('rageAmount').style.width = currentRageWidth + 'px';
-    }
-    function resetRage() {
-        document.getElementById('rageAmount').style.width = '0px';
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/***
- *    ██████╗     ██████╗      █████╗     ██╗    ██╗    ██╗    ███╗   ██╗     ██████╗     ███████╗
- *    ██╔══██╗    ██╔══██╗    ██╔══██╗    ██║    ██║    ██║    ████╗  ██║    ██╔════╝     ██╔════╝
- *    ██║  ██║    ██████╔╝    ███████║    ██║ █╗ ██║    ██║    ██╔██╗ ██║    ██║  ███╗    ███████╗
- *    ██║  ██║    ██╔══██╗    ██╔══██║    ██║███╗██║    ██║    ██║╚██╗██║    ██║   ██║    ╚════██║
- *    ██████╔╝    ██║  ██║    ██║  ██║    ╚███╔███╔╝    ██║    ██║ ╚████║    ╚██████╔╝    ███████║
- *    ╚═════╝     ╚═╝  ╚═╝    ╚═╝  ╚═╝     ╚══╝╚══╝     ╚═╝    ╚═╝  ╚═══╝     ╚═════╝     ╚══════╝
- *                                                                                                
- */
- function drawScene() {
-	bgPositions.d.y += 1;
-	bgPositions.t.y += 1;
-
-	if(bgPositions.d.y >= canvas.height) {
-		bgPositions.d.y = 0;
-		bgPositions.t.y = -canvas.height;
-	}
-    context.fillStyle="black";
-    context.fillRect(0,0,canvas.width,canvas.height);
-	context.drawImage(bgs.d, bgPositions.d.x, bgPositions.d.y, canvas.width, canvas.height);
-	context.drawImage(bgs.t, bgPositions.t.x, bgPositions.t.y, canvas.width, canvas.height);
-}
-function drawAimSight() {
-	let grd = context.createLinearGradient(pl.x, pl.y, pl.x, pl.y-500);
-	grd.addColorStop(0,"blue");
-	grd.addColorStop(1,"transparent");
-    context.fillStyle=grd;
-    context.fillRect(pl.x + (pl.w/2), 0, 1, pl.y);
-}
-function drawBonuses() {
-	context.fillStyle="red";
-	for(let i=0; i<bonuses.length; i++) {
-		let b = bonuses[i];
-		checkBonusOutOfBounds(b,i);
-		animateBonus(b,i);
-	    context.fillRect(b.x, b.y, b.w, b.h);
-	    let effect = '';
-	    switch(b.type) {
-	    	case 'asteroid':
-	    		effect = 'blockMissile'
-	    	break;
-	    }
-	    checkEntityCollisionWithMissiles(b, bonuses, i, effect);
-	    if(checkEntityCollisionWithPlayer(b)) {
-
-	    }
-    }
-}
-function drawMissiles() {
-	context.fillStyle="tomato";
-	for(let i=0; i<missiles.length; i++) {
-
-		let m = missiles[i];
-		checkMissileOutOfBounds(m,i);
-		animateMissile(m);
-	    context.fillRect(m.x, m.y, m.w, m.h);
-    }
-}
-function drawEnemies() {
-	for(let i=0; i<enemies.length; i++) {
-		let en = enemies[i];
-		context.fillStyle = en.c;
-		checkEnemyOutOfBounds(en,i);
-		animateEnemy(en);
-
-	    context.fillRect(en.x, en.y, en.w, en.h);
-	    checkEntityCollisionWithMissiles(en, enemies, i, 'hitEntity');
-    }
-}
-function drawPlayer() {
-    
-    // set position if moving
-    if(dirs != '') {
-		
-		if(dirs.up) {
-			if(pl.sy > -pl.ms) {
-				pl.sy--;
-			}
-		}
-		if(dirs.down) {
-			if(pl.sy < pl.ms) {
-				pl.sy++;
-			}
-		}
-		if(dirs.left) {
-			if(pl.sx > -pl.ms) {
-				pl.sx--;
-			}
-		}
-		if(dirs.right) {
-			if(pl.sx < pl.ms) {
-				pl.sx++;
-			}
-		}
-	    pl.sx *= friction;
-	    pl.sy *= friction;
-	    pl.x += pl.sx
-	    pl.y += pl.sy
-		checkEntitiesCollisionWithPlayer(enemies);
-	    pl = adjustForBoundaries(pl);
-    }  
-
-    context.fillStyle="lime";
-    context.fillRect(pl.x, pl.y, pl.w, pl.h);
-    drawAimSight();
-}
-
-
-
-
-
-
-
-
-
-
-    /***
-     *    ███████╗    ██╗    ██████╗     ██╗    ███╗   ██╗     ██████╗ 
-     *    ██╔════╝    ██║    ██╔══██╗    ██║    ████╗  ██║    ██╔════╝ 
-     *    █████╗      ██║    ██████╔╝    ██║    ██╔██╗ ██║    ██║  ███╗
-     *    ██╔══╝      ██║    ██╔══██╗    ██║    ██║╚██╗██║    ██║   ██║
-     *    ██║         ██║    ██║  ██║    ██║    ██║ ╚████║    ╚██████╔╝
-     *    ╚═╝         ╚═╝    ╚═╝  ╚═╝    ╚═╝    ╚═╝  ╚═══╝     ╚═════╝ 
-     *                                                                 
-     */
-     function startFiring() {
-    	if(!isFiring) {
-    		firingRate *= 1.1;
-    		firingRate = firingRate > 500 ? 500 : firingRate;
-    		isFiring = true;
-    		wasFiring = true;
-
-    		createMissile();
-    		firingTimeout = setTimeout(function() {
-    			isFiring = false;
-    		}, firingRate);
-    	}
-
-    }
-    function stopFiring() {
-    	firingRate = 100;
-    }
-
-
-    function carpetBombing() {
-
-        pl.isRageAvailable = false;
-        resetRage();
-            if(!isFiring) {
-                carpetBombingData.y -= carpetBombingData.h*3;
-                isFiring = true;
-                wasFiring = true;
-                    createCustomMissile(carpetBombingData)
-                //createMissile();
-                carpetbombingTimeout = setTimeout(function() {
-                    isFiring = false;
-                    carpetBombing();
-                    if(carpetBombingData.y <= 0) {
-                        clearInterval(carpetbombingTimeout);
-                    }
-                }, firingRate);
-            }
-        
-    }
-
-
-
-
-
-
-
-    /***
-     *     ██████╗    ██████╗     ███████╗     █████╗     ████████╗    ██╗     ██████╗     ███╗   ██╗    ███████╗
-     *    ██╔════╝    ██╔══██╗    ██╔════╝    ██╔══██╗    ╚══██╔══╝    ██║    ██╔═══██╗    ████╗  ██║    ██╔════╝
-     *    ██║         ██████╔╝    █████╗      ███████║       ██║       ██║    ██║   ██║    ██╔██╗ ██║    ███████╗
-     *    ██║         ██╔══██╗    ██╔══╝      ██╔══██║       ██║       ██║    ██║   ██║    ██║╚██╗██║    ╚════██║
-     *    ╚██████╗    ██║  ██║    ███████╗    ██║  ██║       ██║       ██║    ╚██████╔╝    ██║ ╚████║    ███████║
-     *     ╚═════╝    ╚═╝  ╚═╝    ╚══════╝    ╚═╝  ╚═╝       ╚═╝       ╚═╝     ╚═════╝     ╚═╝  ╚═══╝    ╚══════╝
-     *                                                                                                           
-     */
-     function createMissile(dir) {
-    	if(!dir) {
-    		dir = 'c';
-    	}
-    	let missile = {
-    		x: (pl.x + (pl.w/2) - 3),
-    		y: (pl.y + (pl.h/2)),
-    		xd: mstats.xd, // x direction
-    		w: mstats.w,
-    		h: mstats.h,
-    		sy: mstats.sy // speed Y axis
-    	};
-    	switch(dir) {
-    		case 'l':  // angle to the left
-    			missile.xd = -1;
-    		break;
-    		case 'c': // no angle
-    			missile.xd = 0;
-    		break;
-    		case 'r': // angle to the right
-    			missile.xd = 1;
-    		break;
-    	}
-    	missiles.push(missile);
-    	settings.score -= 1;
-    }
-
-     function createCustomMissile(data) {
-        let customMissile = {
-            type: data.t,
-            x: data.x,
-            y: data.y,
-            xd: data.xd, // -1 angles to left; 1 angles to the right; O does no angle
-            w: data.w,
-            h: data.h,
-            sy: data.sy, // speed Y axis
-            sx: data.sx // speed Y axis
-        };
-        missiles.push(customMissile);
-     }
-
-    function createBonus() {
-    	let b = bonusesMap.get('asteroid');
-    	let randY = getRandomInt((-1*(canvas.height/3)), ((canvas.height/3)-ses.h));
-    	let randSpeedX = getRandomInt(b.sx[0], b.sx[1]);
-    	let randSpeedY = getRandomInt(b.sy[0], b.sy[1]);
-    	let bonus = {
-    		x: -25,
-    		y: randY,
-    		w: b.w,
-    		h: b.h,
-    		sx: randSpeedX,
-    		sy: randSpeedY,
-			dirMod: 1,
-    		type: b.type
-    	};
-    	bonuses.push(bonus);
-    }
-    function createEnemy() {
-    	let randX = getRandomInt(5, ((canvas.width-5)-ses.w));
-    	let enemy = {
-    		ox: randX,
-    		x: randX,
-    		oy: ses.y,
-    		y: ses.y,
-    		w: ses.w,
-    		h: ses.h,
-    		sx: ses.sx,
-    		sy: getRandomInt(ses.sy-2, ses.sy+2),
-    		c: ses.c,
-    		pts: ses.pts
-    	};
-    	enemies.push(enemy);
-    }
 
 
 
@@ -525,24 +190,115 @@ function drawPlayer() {
 
 
 
+    /***
+     *     ██████╗    ██████╗     ███████╗     █████╗     ████████╗    ██╗     ██████╗     ███╗   ██╗    ███████╗
+     *    ██╔════╝    ██╔══██╗    ██╔════╝    ██╔══██╗    ╚══██╔══╝    ██║    ██╔═══██╗    ████╗  ██║    ██╔════╝
+     *    ██║         ██████╔╝    █████╗      ███████║       ██║       ██║    ██║   ██║    ██╔██╗ ██║    ███████╗
+     *    ██║         ██╔══██╗    ██╔══╝      ██╔══██║       ██║       ██║    ██║   ██║    ██║╚██╗██║    ╚════██║
+     *    ╚██████╗    ██║  ██║    ███████╗    ██║  ██║       ██║       ██║    ╚██████╔╝    ██║ ╚████║    ███████║
+     *     ╚═════╝    ╚═╝  ╚═╝    ╚══════╝    ╚═╝  ╚═╝       ╚═╝       ╚═╝     ╚═════╝     ╚═╝  ╚═══╝    ╚══════╝
+     *                                                                                                           
+     */
+     function createMissile(dir) {
+    	if(!dir) {
+    		dir = 'c';
+    	}
+    	let missile = {
+    		x: (pl.x + (pl.w/2) - 3),
+    		y: (pl.y + (pl.h/2)),
+    		xd: mstats.xd, // x direction
+    		w: mstats.w,
+    		h: mstats.h,
+    		sy: mstats.sy, // speed Y axis
+    		sx: mstats.sx // speed Y axis
+    	};
+    	switch(dir) {
+    		case 'l':  // angle to the left
+    			missile.xd = -1;
+    		break;
+    		case 'c': // no angle
+    			missile.xd = 0;
+    		break;
+    		case 'r': // angle to the right
+    			missile.xd = 1;
+    		break;
+    	}
+    	missiles.push(missile);
+    	settings.score -= 1;
+    }
+
+     function createCustomMissile(data) {
+        let customMissile = {
+            type: data.t,
+            x: data.x,
+            y: data.y,
+            xd: data.xd, // -1 angles to left; 1 angles to the right; O does no angle
+            w: data.w,
+            h: data.h,
+            sy: data.sy, // speed Y axis
+            sx: data.sx, // speed Y axis
+            color: data.color
+        };
+        missiles.push(customMissile);
+     }
 
 
+    function createBonus(name) {
+    	let b = bonusesMap.get(name);
+    	let randY = getRandomInt((-1*(canvas.height/3)), ((canvas.height/3)-b.h));
+    	let randSpeedX = getRandomInt(b.sx[0], b.sx[1]);
+    	let randSpeedY = getRandomInt(b.sy[0], b.sy[1]);
+    	let bonus = {
+    		x: b.w*2,
+    		y: randY,
+    		w: b.w,
+    		h: b.h,
+    		sx: randSpeedX,
+    		sy: randSpeedY,
+			dirMod: 1,
+    		type: b.type
+    	};
+    	bonuses.push(bonus);
+    }
+    function createItem(name) {
+    	let it = itemsMap.get(name);
+    	let goRight = Math.random() > 0.5;
+    	let randY = getRandomInt((-1*(canvas.height/3)), ((canvas.height/3)-it.h));
+    	let randx = goRight 
+    					? getRandomInt(canvas.width * -0.3, canvas.width * 0.3) 
+						: getRandomInt(canvas.width * 0.6, canvas.width * 1.3);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    	let randSpeedX = getRandomInt(it.sx[0], it.sx[1]);
+    	let randSpeedY = getRandomInt(it.sy[0], it.sy[1]);
+    	let bonus = {
+    		x: randx,
+    		y: randY,
+    		w: it.w,
+    		h: it.h,
+    		sx: randSpeedX,
+    		sy: randSpeedY,
+			dirMod: goRight ? 1 : -1,
+    		type: it.type
+    	};
+    	items.push(bonus);
+    }
+    function createEnemy() {
+    	let randX = getRandomInt(5, ((canvas.width-5)-ses.w));
+    	let enemy = {
+    		ox: randX,
+    		x: randX,
+    		oy: ses.y,
+    		y: ses.y,
+    		w: ses.w,
+    		h: ses.h,
+    		sx: ses.sx,
+    		sy: getRandomInt(ses.sy-2, ses.sy+2),
+    		c: ses.c,
+    		pts: ses.pts,
+    		collisionEffect: ses.collisionEffect
+    	};
+    	enemies.push(enemy);
+    }
 
 
 
@@ -572,7 +328,7 @@ function drawPlayer() {
     function checkEntityCollisionWithMissiles(entity, entities, indw, effect) {
     	for(let j=0; j<missiles.length; j++) {
     		let m = missiles[j];
-    		let mmid = (m.x+(m.w/2)); // missile middle
+    		
     		if(
     			(
     				entity.x < (m.x+m.w)
@@ -583,8 +339,9 @@ function drawPlayer() {
     				&& entity.y <= (m.y+m.h)
     			)
     		) {
+    			// TODO should return TRUE or FALSE and management should be in parent's method
     			if(effect == 'hitEntity') {
-    				upRage(50);
+    				addRage(50);
     				settings.score += entity.pts;
     				entities.splice(indw,1);
     				missiles.splice(j,1);
@@ -612,7 +369,6 @@ function drawPlayer() {
     				&& (entity.y + entity.h) > pl.y
     			) 
     		) {
-
     			entities.splice(j,1);
     		}
     	}
@@ -623,7 +379,7 @@ function drawPlayer() {
 				entity.x < (pl.x + pl.w) 
 				&& (entity.x + entity.w) > pl.x
 			) 
-			&& 
+			&&
 			(
 				entity.y < (pl.y + pl.h) 
 				&& (entity.y + entity.h) > pl.y
@@ -672,6 +428,257 @@ function drawPlayer() {
 
 
 
+
+
+
+
+
+/***
+ *    ██████╗     ██████╗      █████╗     ██╗    ██╗    ██╗    ███╗   ██╗     ██████╗     ███████╗
+ *    ██╔══██╗    ██╔══██╗    ██╔══██╗    ██║    ██║    ██║    ████╗  ██║    ██╔════╝     ██╔════╝
+ *    ██║  ██║    ██████╔╝    ███████║    ██║ █╗ ██║    ██║    ██╔██╗ ██║    ██║  ███╗    ███████╗
+ *    ██║  ██║    ██╔══██╗    ██╔══██║    ██║███╗██║    ██║    ██║╚██╗██║    ██║   ██║    ╚════██║
+ *    ██████╔╝    ██║  ██║    ██║  ██║    ╚███╔███╔╝    ██║    ██║ ╚████║    ╚██████╔╝    ███████║
+ *    ╚═════╝     ╚═╝  ╚═╝    ╚═╝  ╚═╝     ╚══╝╚══╝     ╚═╝    ╚═╝  ╚═══╝     ╚═════╝     ╚══════╝
+ *                                                                                                
+ */
+var relativeSpeedY = 0;
+ function getPlayerPosY_inPercents() {
+ 	return (pl.y * 100) / canvas.height;
+ }
+ function drawScene() {
+ 	relativeSpeedY = 1+(1-(getPlayerPosY_inPercents()/95)*1.9);
+ 	
+	bgPositions.d.y += settings.backgroundSpeeds.y*relativeSpeedY;
+	bgPositions.t.y += settings.backgroundSpeeds.y*relativeSpeedY;
+
+	if(bgPositions.d.y >= canvas.height) {
+		bgPositions.d.y = 0;
+		bgPositions.t.y = -canvas.height;
+	}
+    context.fillStyle="black";
+    context.fillRect(0,0,canvas.width,canvas.height);
+	context.drawImage(bgs.d, bgPositions.d.x, bgPositions.d.y, canvas.width, canvas.height);
+	context.drawImage(bgs.t, bgPositions.t.x, bgPositions.t.y, canvas.width, canvas.height);
+}
+function drawAimSight() {
+	let grd = context.createLinearGradient(pl.x, pl.y, pl.x, pl.y-500);
+	grd.addColorStop(0,"blue");
+	grd.addColorStop(1,"transparent");
+    context.fillStyle=grd;
+    context.fillRect(pl.x + (pl.w/2), 0, 1, pl.y);
+}
+function drawBonuses() {
+	context.fillStyle="red";
+	for(let i=0; i<bonuses.length; i++) {
+		let b = bonuses[i];
+		checkBonusOutOfBounds(b,i);
+		animateBonus(b,i);
+	    context.fillRect(b.x, b.y, b.w, b.h);
+	    let effect = '';
+	   
+	    checkEntityCollisionWithMissiles(b, bonuses, i, effect);
+	    if(checkEntityCollisionWithPlayer(b)) {
+
+	    }
+    }
+}
+function drawItems() {
+	context.fillStyle="deeppink";
+	for(let i=0; i<items.length; i++) {
+		let it = items[i];
+		checkBonusOutOfBounds(it,i);
+		animateBonus(it,i);
+	    context.fillRect(it.x, it.y, it.w, it.h);
+	    let effect = '';
+	    switch(it.type) {
+	    	case 'asteroid':
+	    		effect = 'blockMissile'
+	    	break;
+	    }
+	    checkEntityCollisionWithMissiles(it, items, i, effect);
+	    if(checkEntityCollisionWithPlayer(it)) {
+			addHealth(-20);
+	    }
+    }
+}
+function drawMissiles() {
+	for(let i=0; i<missiles.length; i++) {
+
+		let m = missiles[i];
+		context.fillStyle='green';
+		checkMissileOutOfBounds(m,i);
+		animateMissile(m);
+	    context.fillRect(m.x, m.y, m.w, m.h);
+    }
+}
+function drawEnemies() {
+	for(let i=0; i<enemies.length; i++) {
+		let en = enemies[i];
+		context.fillStyle = en.c;
+		checkEnemyOutOfBounds(en,i);
+		animateEnemy(en);
+
+	    context.fillRect(en.x, en.y, en.w, en.h);
+	    checkEntityCollisionWithMissiles(en, enemies, i, 'hitEntity');
+	    if(checkEntityCollisionWithPlayer(en)) {
+			addHealth(-40);
+	    }
+
+	    
+    }
+}
+function drawPlayer() {
+    
+    // set position if moving
+    if(dirs != '') {
+		
+		if(dirs.up) {
+			if(pl.sy > -pl.ms) {
+				pl.sy--;
+			}
+		}
+		if(dirs.down) {
+			if(pl.sy < pl.ms) {
+				pl.sy++;
+			}
+		}
+		if(dirs.left) {
+			if(pl.sx > -pl.ms) {
+				pl.sx--;
+			}
+		}
+		if(dirs.right) {
+			if(pl.sx < pl.ms) {
+				pl.sx++;
+			}
+		}
+	    pl.sx *= friction;
+	    pl.sy *= friction;
+	    pl.x += pl.sx
+	    pl.y += pl.sy
+		checkEntitiesCollisionWithPlayer(enemies);
+	    pl = adjustForBoundaries(pl);
+    }  
+
+    context.fillStyle="lime";
+    context.fillRect(pl.x, pl.y, pl.w, pl.h);
+    drawAimSight();
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /***
+     *    ███████╗    ██╗    ██████╗     ██╗    ███╗   ██╗     ██████╗ 
+     *    ██╔════╝    ██║    ██╔══██╗    ██║    ████╗  ██║    ██╔════╝ 
+     *    █████╗      ██║    ██████╔╝    ██║    ██╔██╗ ██║    ██║  ███╗
+     *    ██╔══╝      ██║    ██╔══██╗    ██║    ██║╚██╗██║    ██║   ██║
+     *    ██║         ██║    ██║  ██║    ██║    ██║ ╚████║    ╚██████╔╝
+     *    ╚═╝         ╚═╝    ╚═╝  ╚═╝    ╚═╝    ╚═╝  ╚═══╝     ╚═════╝ 
+     *                                                                 
+     */
+     function startFiring() {
+    	if(!isFiring) {
+    		firingRate *= 1.1;
+    		firingRate = firingRate > 500 ? 500 : firingRate;
+    		isFiring = true;
+    		wasFiring = true;
+    		createMissile();
+    		firingTimeout = setTimeout(function() {
+    			isFiring = false;
+    		}, firingRate);
+    	}
+
+    }
+    function stopFiring() {
+    	firingRate = 100;
+    }
+
+
+    function carpetBombing() {
+
+        pl.isRageAvailable = false;
+            if(!isFiring) {
+                carpetBombingData.y -= carpetBombingData.h*3;
+                isFiring = true;
+                wasFiring = true;
+                    createCustomMissile(carpetBombingData)
+                //createMissile();
+                carpetbombingTimeout = setTimeout(function() {
+                    isFiring = false;
+                    carpetBombing();
+                    if(carpetBombingData.y <= 0) {
+                    	isFiring = false;
+                    	carpetBombingData.y = carpetBombingData.oy;
+        				resetRage();
+                        clearInterval(carpetbombingTimeout);
+                    }
+                }, firingRate);
+            }
+        
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/***
+ *    ███╗   ███╗     ██████╗     ██╗   ██╗    ███████╗    ███╗   ███╗    ███████╗    ███╗   ██╗    ████████╗    ███████╗
+ *    ████╗ ████║    ██╔═══██╗    ██║   ██║    ██╔════╝    ████╗ ████║    ██╔════╝    ████╗  ██║    ╚══██╔══╝    ██╔════╝
+ *    ██╔████╔██║    ██║   ██║    ██║   ██║    █████╗      ██╔████╔██║    █████╗      ██╔██╗ ██║       ██║       ███████╗
+ *    ██║╚██╔╝██║    ██║   ██║    ╚██╗ ██╔╝    ██╔══╝      ██║╚██╔╝██║    ██╔══╝      ██║╚██╗██║       ██║       ╚════██║
+ *    ██║ ╚═╝ ██║    ╚██████╔╝     ╚████╔╝     ███████╗    ██║ ╚═╝ ██║    ███████╗    ██║ ╚████║       ██║       ███████║
+ *    ╚═╝     ╚═╝     ╚═════╝       ╚═══╝      ╚══════╝    ╚═╝     ╚═╝    ╚══════╝    ╚═╝  ╚═══╝       ╚═╝       ╚══════╝
+ *                                                                                                                       
+ */
+ function speedUpPlayer() {
+	if(!pl.isSpeedingUp) {
+		pl.isSpeedingUp = true;
+		pl.wasSpeedingUp = true;
+		pl.ms *= 2;
+	}
+}
+function speedDownPlayer() {
+	pl.isSpeedingUp = false;
+	pl.wasSpeedingUp = false;
+	pl.ms /= 2;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     /***
      *    ███████╗    ██████╗      █████╗     ██╗    ██╗    ███╗   ██╗            ██╗          ██████╗      ██████╗     ██████╗     ███████╗
      *    ██╔════╝    ██╔══██╗    ██╔══██╗    ██║    ██║    ████╗  ██║            ██║         ██╔═══██╗    ██╔═══██╗    ██╔══██╗    ██╔════╝
@@ -694,13 +701,143 @@ function drawPlayer() {
     function spawnBonuses() {
     	if(!isBonusesSpawning) return;
     	if(!btns.pause) {
-    		createBonus();
+    		//createBonus();
 		}
     	setTimeout(function() {
     		spawnBonuses();
 
     	}, bonusSpawningTimer);
     }
+    function spawnItems() {
+    	let tempTimer = getRandomInt(itemsSpawningTimer/2, itemsSpawningTimer*2);
+    	if(!isItemsSpawning) return;
+    	if(!btns.pause) {
+
+    		createItem('asteroid');
+		}
+    	setTimeout(function() {
+    		spawnItems();
+    	}, tempTimer);
+    }
+
+
+
+
+
+
+
+
+/***
+ *    ███████╗    ████████╗     █████╗     ████████╗    ███████╗
+ *    ██╔════╝    ╚══██╔══╝    ██╔══██╗    ╚══██╔══╝    ██╔════╝
+ *    ███████╗       ██║       ███████║       ██║       ███████╗
+ *    ╚════██║       ██║       ██╔══██║       ██║       ╚════██║
+ *    ███████║       ██║       ██║  ██║       ██║       ███████║
+ *    ╚══════╝       ╚═╝       ╚═╝  ╚═╝       ╚═╝       ╚══════╝
+ *                                                              
+ */
+    
+
+    function addRage(amount) {
+        if(!amount) amount = 35;
+        let currentRageWidth = 1*(getComputedStyle(document.getElementById('rageAmount')).width.split('px')[0]);
+        currentRageWidth += amount;
+        if(currentRageWidth >= fullRageWidth) {
+            currentRageWidth = fullRageWidth;
+            pl.isRageAvailable = true;
+        }
+        document.getElementById('rageAmount').style.width = currentRageWidth + 'px';
+    }
+    function resetRage() {
+        document.getElementById('rageAmount').style.width = '0px';
+    }
+
+
+    function addHealth(amount) { // total : 200
+        if(!amount) amount = 60;
+        let currentHealthWidth = 1*(getComputedStyle(document.getElementById('healthAmount')).width.split('px')[0]);
+        currentHealthWidth += amount;
+        if(currentHealthWidth >= fullHealthWidth) {
+            currentHealthWidth = fullHealthWidth;
+        }
+        if(currentHealthWidth <= 0) {
+            currentHealthWidth = 0;
+            btns.pause = true;
+            setTimeout(function() {
+            	alert('You dead.');
+            }, 200);
+        }
+        document.getElementById('healthAmount').style.width = currentHealthWidth + 'px';
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -720,6 +857,7 @@ function drawPlayer() {
      *     ╚═════╝        ╚═╝       ╚═╝    ╚══════╝    ╚══════╝
      *                                                         
      */
+     // utils
      function getRandomInt(min, max) {
         return min + Math.floor(Math.random() * (max - min + 1));
     }
@@ -728,6 +866,7 @@ function drawPlayer() {
     	context.fillStyle = "white";
     	context.fillText(('score: '+ settings.score), 50, 100);
     }
+
 
 
 
@@ -755,11 +894,10 @@ function drawPlayer() {
 	    	drawMissiles();
 	    	drawEnemies();
 	    	drawBonuses();
+	    	drawItems();
 	    	writeScore();
 	    }
     }
-
-
 
 
 
@@ -799,5 +937,6 @@ function drawPlayer() {
     	document.addEventListener("keyup", keyLetGo);
     	// init creation loops
     	spawnEnemies();
-    	spawnBonuses();
+    	//spawnBonuses();
+    	spawnItems();
     }

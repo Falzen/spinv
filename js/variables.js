@@ -22,6 +22,10 @@
 var settings = {
 	canvasWidth: 450,
 	canvasHeight: 800,
+	backgroundSpeeds: {
+		y: 4, // default, should be function of enemies number
+		x: 0 // going sideways (no)
+	},
 	score: 200
 }
 // engine mechanics
@@ -31,8 +35,11 @@ var friction = 0.89
 var enemySpawningTimer = 800;
 var isEnemiesSpawning = true;
 // spawnBonuses
-var bonusSpawningTimer = 1200;
 var isBonusesSpawning = true;
+var bonusSpawningTimer = 1200;
+// spawn items
+var isItemsSpawning = true;
+var itemsSpawningTimer = 1200;
 
 
 
@@ -63,6 +70,7 @@ var isBonusesSpawning = true;
 	wasSpeedingUp: false,
 	isRageAvailable: false
 }
+var fullHealthWidth =  1*(getComputedStyle(document.getElementById('healthBar')).width.split('px')[0]);
 var fullRageWidth =  1*(getComputedStyle(document.getElementById('rageBar')).width.split('px')[0]);
 var domRageAmount = document.getElementById('rageAmount');
 
@@ -141,17 +149,20 @@ var domRageAmount = document.getElementById('rageAmount');
  var missiles = [];
 var enemies = [];
 var bonuses = [];
+var items = [];
 var playerFiringInterval;
-            var carpetBombingData = {
-            	type: 'carpetbombing',
-                x: 0,
-                y: settings.canvasHeight*1.2,
-                xd: 0,
-                w: 22,
-                h: 22,
-                sy: 8,
-                sx: 12
-            }
+var carpetBombingData = {
+	type: 'carpetbombing',
+    x: 0,
+    y: settings.canvasHeight*1.2,
+    oy: settings.canvasHeight*1.2,// original Y position
+    xd: 0,
+    w: 22,
+    h: 22,
+    sy: 8,
+    sx: 12,
+    color: 'blue'
+}
 
 
 
@@ -194,13 +205,14 @@ var firingTimeout = null;
 // standardEnemyStats
 var ses = {
 	x: 5,
-	y: 50,
+	y: -72,
 	w: 24,
 	h: 48,
 	sx: 0,
 	sy: 4,
 	c: 'tomato',
-	pts: 5
+	pts: 5,
+	collisionEffect: 'hitEntity'
 };
 
 
@@ -264,7 +276,8 @@ var mstats = {
 		xd: 0, // x direction
 		w: 6,
 		h: 6,
-		sy: 14 // speed Y axis
+		sy: 14, // speed Y axis
+		sx: 0 // speed Y axis
 	}
 
 
@@ -285,17 +298,37 @@ var mstats = {
  *    ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝ ╚══════╝╚══════╝╚══════╝  
  */
 // bonuses stats
-var bstats = {
-	x: null,
-	y: null,
-	w: 20,
-	h: 20,
-	sx: 7,
-	sy: 3,
-	type: 1
-}
 var bonusesMap = new Map();
 bonusesMap.set(
+	'shield',
+	{
+		x: null,
+		y: null,
+		w: 16,
+		h: 16,
+		sx: [2,5],
+		sy: [3,4],
+		dirMod: 1, // direction modifier : 1 or -1
+		type: 'shield'
+	}
+);
+
+
+
+
+
+/***
+ *    ██╗    ████████╗    ███████╗    ███╗   ███╗    ███████╗
+ *    ██║    ╚══██╔══╝    ██╔════╝    ████╗ ████║    ██╔════╝
+ *    ██║       ██║       █████╗      ██╔████╔██║    ███████╗
+ *    ██║       ██║       ██╔══╝      ██║╚██╔╝██║    ╚════██║
+ *    ██║       ██║       ███████╗    ██║ ╚═╝ ██║    ███████║
+ *    ╚═╝       ╚═╝       ╚══════╝    ╚═╝     ╚═╝    ╚══════╝
+ *                                                           
+ */
+ // items stats
+var itemsMap = new Map();
+itemsMap.set(
 	'civilians',
 	{
 		x: null,
@@ -305,19 +338,21 @@ bonusesMap.set(
 		sx: [2,5],
 		sy: [3,4],
 		dirMod: 1, // direction modifier : 1 or -1
-		type: 'civilian'
+		type: 'civilian',
+		effect: 'blockMissile'
 	}
 );
-bonusesMap.set(
+itemsMap.set(
 	'asteroid',
 	{
 		x: null,
 		y: null,
-		w: 30,
-		h: 30,
+		w: 12,
+		h: 12,
 		sx: [1,6],
-		sy: [1,5],
+		sy: [3,4],
 		dirMod: 1, // direction modifier : 1 or -1
-		type: 'asteroid'
+		type: 'asteroid',
+		effect: 'blockMissile'
 	}
 );
