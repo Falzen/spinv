@@ -63,9 +63,8 @@ var isBonusesSpawning = true;
 	wasSpeedingUp: false,
 	isRageAvailable: false
 }
-
-    var fullRageWidth =  1*(getComputedStyle(document.getElementById('rageBar')).width.split('px')[0]);
- 
+var fullRageWidth =  1*(getComputedStyle(document.getElementById('rageBar')).width.split('px')[0]);
+var domRageAmount = document.getElementById('rageAmount');
 
 
 
@@ -143,7 +142,16 @@ var isBonusesSpawning = true;
 var enemies = [];
 var bonuses = [];
 var playerFiringInterval;
-
+            var carpetBombingData = {
+            	type: 'carpetbombing',
+                x: 0,
+                y: settings.canvasHeight*1.2,
+                xd: 0,
+                w: 22,
+                h: 22,
+                sy: 8,
+                sx: 12
+            }
 
 
 

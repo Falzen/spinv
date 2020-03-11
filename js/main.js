@@ -117,6 +117,7 @@
 		|| dirs.arrowUp
 	) {
 		startFiring();
+    
 	} else if(wasFiring == true) {
 		stopFiring();
 	}
@@ -133,9 +134,7 @@
 		dirs.arrowDown
 		&& pl.isRageAvailable == true
 	) {
-		pl.isRageAvailable = false;
-		resetRage();
-		alert('bim');
+        carpetBombing();
 	}
 }
 
@@ -169,6 +168,50 @@ function speedDownPlayer() {
 	pl.wasSpeedingUp = false;
 	pl.ms /= 2;
 }
+
+
+
+
+
+
+
+/***
+ *    ███████╗    ████████╗     █████╗     ████████╗    ███████╗
+ *    ██╔════╝    ╚══██╔══╝    ██╔══██╗    ╚══██╔══╝    ██╔════╝
+ *    ███████╗       ██║       ███████║       ██║       ███████╗
+ *    ╚════██║       ██║       ██╔══██║       ██║       ╚════██║
+ *    ███████║       ██║       ██║  ██║       ██║       ███████║
+ *    ╚══════╝       ╚═╝       ╚═╝  ╚═╝       ╚═╝       ╚══════╝
+ *                                                              
+ */
+    
+
+    function upRage(amount) {
+        if(!amount) amount = 35;
+        let currentRageWidth = 1*(getComputedStyle(document.getElementById('rageAmount')).width.split('px')[0]);
+        currentRageWidth += amount;
+        if(currentRageWidth >= fullRageWidth) {
+            currentRageWidth = fullRageWidth;
+            pl.isRageAvailable = true;
+        }
+        document.getElementById('rageAmount').style.width = currentRageWidth + 'px';
+    }
+    function resetRage() {
+        document.getElementById('rageAmount').style.width = '0px';
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -233,7 +276,7 @@ function drawMissiles() {
 
 		let m = missiles[i];
 		checkMissileOutOfBounds(m,i);
-		animateMissile(m,i);
+		animateMissile(m);
 	    context.fillRect(m.x, m.y, m.w, m.h);
     }
 }
@@ -309,19 +352,40 @@ function drawPlayer() {
     		firingRate *= 1.1;
     		firingRate = firingRate > 500 ? 500 : firingRate;
     		isFiring = true;
-    		wasFiring = true; // 
+    		wasFiring = true;
+
     		createMissile();
     		firingTimeout = setTimeout(function() {
     			isFiring = false;
     		}, firingRate);
     	}
+
     }
     function stopFiring() {
     	firingRate = 100;
     }
 
 
+    function carpetBombing() {
 
+        pl.isRageAvailable = false;
+        resetRage();
+            if(!isFiring) {
+                carpetBombingData.y -= carpetBombingData.h*3;
+                isFiring = true;
+                wasFiring = true;
+                    createCustomMissile(carpetBombingData)
+                //createMissile();
+                carpetbombingTimeout = setTimeout(function() {
+                    isFiring = false;
+                    carpetBombing();
+                    if(carpetBombingData.y <= 0) {
+                        clearInterval(carpetbombingTimeout);
+                    }
+                }, firingRate);
+            }
+        
+    }
 
 
 
@@ -345,25 +409,40 @@ function drawPlayer() {
     	let missile = {
     		x: (pl.x + (pl.w/2) - 3),
     		y: (pl.y + (pl.h/2)),
-    		xd:mstats.xd, // x direction
-    		w:mstats.w,
-    		h:mstats.h,
-    		sy:mstats.sy // speed Y axis
+    		xd: mstats.xd, // x direction
+    		w: mstats.w,
+    		h: mstats.h,
+    		sy: mstats.sy // speed Y axis
     	};
     	switch(dir) {
-    		case 'l': 
+    		case 'l':  // angle to the left
     			missile.xd = -1;
     		break;
-    		case 'c': 
+    		case 'c': // no angle
     			missile.xd = 0;
     		break;
-    		case 'r': 
+    		case 'r': // angle to the right
     			missile.xd = 1;
     		break;
     	}
     	missiles.push(missile);
     	settings.score -= 1;
     }
+
+     function createCustomMissile(data) {
+        let customMissile = {
+            type: data.t,
+            x: data.x,
+            y: data.y,
+            xd: data.xd, // -1 angles to left; 1 angles to the right; O does no angle
+            w: data.w,
+            h: data.h,
+            sy: data.sy, // speed Y axis
+            sx: data.sx // speed Y axis
+        };
+        missiles.push(customMissile);
+     }
+
     function createBonus() {
     	let b = bonusesMap.get('asteroid');
     	let randY = getRandomInt((-1*(canvas.height/3)), ((canvas.height/3)-ses.h));
@@ -418,7 +497,8 @@ function drawPlayer() {
      *                                                                                                                       
      */
      function animateMissile(m) {
-    	m.y -= m.sy;
+        m.y -= m.sy;
+        m.x += m.sx;
     }
     function animateEnemy(en) {
     	en.y += en.sy;
@@ -436,21 +516,30 @@ function drawPlayer() {
 		b.x += (b.sx*b.dirMod);
 
     }
-    
-var domRageAmount = document.getElementById('rageAmount');
-    function upRage(amount) {
-    	if(amount == null) amount = 35;
-    	let currentRageWidth = 1*(getComputedStyle(domRageAmount).width.split('px')[0]);
-    	currentRageWidth += amount;
-    	if(currentRageWidth >= fullRageWidth) {
-    		currentRageWidth = fullRageWidth;
-		 	pl.isRageAvailable = true;
-    	}
-    	domRageAmount.style.width = currentRageWidth + 'px';
-    }
-    function resetRage(amount) {
-		domRageAmount.style.width = '0px';
-    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -495,7 +584,7 @@ var domRageAmount = document.getElementById('rageAmount');
     			)
     		) {
     			if(effect == 'hitEntity') {
-    				upRage();
+    				upRage(50);
     				settings.score += entity.pts;
     				entities.splice(indw,1);
     				missiles.splice(j,1);
