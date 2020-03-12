@@ -283,21 +283,38 @@
     	items.push(bonus);
     }
     function createEnemy() {
-    	let randX = getRandomInt(5, ((canvas.width-5)-ses.w));
-    	let enemy = {
-    		ox: randX,
-    		x: randX,
-    		oy: ses.y,
-    		y: ses.y,
-    		w: ses.w,
-    		h: ses.h,
-    		sx: ses.sx,
-    		sy: getRandomInt(ses.sy-2, ses.sy+2),
-    		c: ses.c,
-    		pts: ses.pts,
-    		collisionEffect: ses.collisionEffect
-    	};
-    	enemies.push(enemy);
+        let randX = getRandomInt(5, ((canvas.width-5)-ses.w));
+        let enemy = {
+            ox: randX,
+            x: randX,
+            oy: ses.y,
+            y: ses.y,
+            w: ses.w,
+            h: ses.h,
+            sx: ses.sx,
+            sy: getRandomInt(ses.sy-2, ses.sy+2),
+            c: ses.c,
+            pts: ses.pts,
+            collisionEffect: ses.collisionEffect
+        };
+        enemies.push(enemy);
+    }
+    function createEnemytest() {
+        let randX = getRandomInt(5, ((canvas.width-5)-ses.w));
+        let enemy = {
+            ox: randX,
+            x: canvas.width*0.75,
+            oy: canvas.height*0.75,
+            y: canvas.height*0.75,
+            w: ses.w,
+            h: ses.h,
+            sx: 0,
+            sy: 0,
+            c: ses.c,
+            pts: ses.pts,
+            collisionEffect: ses.collisionEffect
+        };
+        enemies.push(enemy);
     }
 
 
@@ -521,6 +538,7 @@ function drawEnemies() {
 
 	    context.fillRect(en.x, en.y, en.w, en.h);
 	    checkEntityCollisionWithMissiles(en, enemies, i, 'hitEntity');
+
 	    if(checkEntityCollisionWithPlayer(en)) {
 			addHealth(-40);
 	    }
@@ -557,7 +575,7 @@ function drawPlayer() {
 	    pl.sy *= friction;
 	    pl.x += pl.sx
 	    pl.y += pl.sy
-		checkEntitiesCollisionWithPlayer(enemies);
+		//checkEntitiesCollisionWithPlayer(enemies);
 	    pl = adjustForBoundaries(pl);
     }  
 
@@ -755,11 +773,23 @@ function speedDownPlayer() {
 
     function addHealth(amount) { // total : 200
         if(!amount) amount = 60;
+        if(pl.isInvincible) amount = 0;
         let currentHealthWidth = 1*(getComputedStyle(document.getElementById('healthAmount')).width.split('px')[0]);
         currentHealthWidth += amount;
         if(currentHealthWidth >= fullHealthWidth) {
             currentHealthWidth = fullHealthWidth;
         }
+
+
+        // if damages, invicible for a second
+        if(amount < 0) {
+            pl.isInvincible = true;
+            setTimeout(function() {
+                pl.isInvincible = false;
+            }, 1000);
+        }
+
+
         if(currentHealthWidth <= 0) {
             currentHealthWidth = 0;
             btns.pause = true;
@@ -891,6 +921,7 @@ function speedDownPlayer() {
 	    	drawScene();
 	    	drawPlayer();
 	    	actionsManager();
+
 	    	drawMissiles();
 	    	drawEnemies();
 	    	drawBonuses();
@@ -936,7 +967,10 @@ function speedDownPlayer() {
         document.addEventListener('keydown',keyPush);
     	document.addEventListener("keyup", keyLetGo);
     	// init creation loops
-    	spawnEnemies();
-    	//spawnBonuses();
+    	
+        spawnEnemies();
+        // createEnemytest();
+    	
+        //spawnBonuses();
     	spawnItems();
     }

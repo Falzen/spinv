@@ -68,7 +68,8 @@ var itemsSpawningTimer = 1200;
 	sy: 0, // speed y
 	isSpeedingUp: false,
 	wasSpeedingUp: false,
-	isRageAvailable: false
+	isRageAvailable: false,
+	isInvincible: false
 }
 var fullHealthWidth =  1*(getComputedStyle(document.getElementById('healthBar')).width.split('px')[0]);
 var fullRageWidth =  1*(getComputedStyle(document.getElementById('rageBar')).width.split('px')[0]);
