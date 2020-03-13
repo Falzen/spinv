@@ -61,16 +61,22 @@ var itemsSpawningTimer = 1200;
  var pl = {
 	x: settings.canvasWidth/3,
 	y: settings.canvasHeight - 48,
-	w: 12,
-	h: 24,
+	w: 24,
+	h: 42,
 	ms: 4, // MAX speed
 	sx: 0, // speed x
 	sy: 0, // speed y
 	isSpeedingUp: false,
 	wasSpeedingUp: false,
 	isRageAvailable: false,
-	isInvincible: false
+	isInvincible: false,
+	img: new Image()
 }
+pl.img.src = "img/spaceshipsprites.gif";
+pl.img.startX = 39;
+pl.img.startY = 39;
+pl.img.spriteWidth = 39;
+pl.img.spriteHeight = 39;
 var fullHealthWidth =  1*(getComputedStyle(document.getElementById('healthBar')).width.split('px')[0]);
 var fullRageWidth =  1*(getComputedStyle(document.getElementById('rageBar')).width.split('px')[0]);
 var domRageAmount = document.getElementById('rageAmount');
