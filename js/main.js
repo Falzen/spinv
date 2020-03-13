@@ -548,80 +548,85 @@ function drawEnemies() {
 }
 
 function drawPlayer() {
-    pl.img.startX = pl.img.spriteWidth;
-    pl.img.startY = 0;
-    // set position if moving
-    if(dirs != '') {
-		
+	pl.img.startX = pl.img.spriteWidth;
+	pl.img.startY = 0;
+	// set position if moving
+	var isOneKeyPressed = false;
+	if(dirs != '') {
+
 		if(dirs.up) {
 			if(pl.sy > -pl.ms) {
 				pl.sy--;
 			}
-
-            if(pl.img.startY == (pl.img.spriteHeight*2)) {
-                pl.img.startY -= pl.img.spriteHeight;
-            } else {
-                pl.img.startY += pl.img.spriteHeight;
-            }
+			
+			if(!isOneKeyPressed && pl.img.startY == (pl.img.spriteHeight*2)) {
+				pl.img.startY -= pl.img.spriteHeight;
+			} else if (!isOneKeyPressed) {
+				pl.img.startY += pl.img.spriteHeight;
+			}
+			isOneKeyPressed = true;
 		}
 		if(dirs.down) {
 			if(pl.sy < pl.ms) {
 				pl.sy++;
 			}
 
-            if(pl.img.startY == (pl.img.spriteHeight*2)) {
-                pl.img.startY -= pl.img.spriteHeight;
-            } else {
-                pl.img.startY += pl.img.spriteHeight;
-            }
+			if(!isOneKeyPressed && pl.img.startY == (pl.img.spriteHeight*2)) {
+				pl.img.startY -= pl.img.spriteHeight;
+			} else if (!isOneKeyPressed) {
+				pl.img.startY += pl.img.spriteHeight;
+			}
+			isOneKeyPressed = true;
 		}
 		if(dirs.left) {
 			if(pl.sx > -pl.ms) {
 				pl.sx--;
 			}
 
-            if(pl.img.startY == (pl.img.spriteHeight*2)) {
-                pl.img.startY -= pl.img.spriteHeight;
-            } else {
-                pl.img.startY += pl.img.spriteHeight;
-            }
-            
-            pl.img.startX -= pl.img.spriteWidth;
+			if(!isOneKeyPressed && pl.img.startY == (pl.img.spriteHeight*2)) {
+				pl.img.startY -= pl.img.spriteHeight;
+			} else if (!isOneKeyPressed) {
+				pl.img.startY += pl.img.spriteHeight;
+			}
+			isOneKeyPressed = true;
+			
+			pl.img.startX -= pl.img.spriteWidth;
 		}
 		if(dirs.right) {
 			if(pl.sx < pl.ms) {
 				pl.sx++;
 			}
 
-            if(pl.img.startY == (pl.img.spriteHeight*2)) {
-                pl.img.startY -= pl.img.spriteHeight;
-            } else {
-                pl.img.startY += pl.img.spriteHeight;
-            }
-            
-            pl.img.startX += pl.img.spriteWidth;
+			if(!isOneKeyPressed && pl.img.startY == (pl.img.spriteHeight*2)) {
+				pl.img.startY -= pl.img.spriteHeight;
+			} else if (!isOneKeyPressed) {
+				pl.img.startY += pl.img.spriteHeight;
+			}
+			isOneKeyPressed = true;
+			
+			pl.img.startX += pl.img.spriteWidth;
 		}
-	    pl.sx *= friction;
-	    pl.sy *= friction;
-	    pl.x += pl.sx
-	    pl.y += pl.sy
+		pl.sx *= friction;
+		pl.sy *= friction;
+		pl.x += pl.sx
+		pl.y += pl.sy
 		//checkEntitiesCollisionWithPlayer(enemies);
-	    pl = adjustForBoundaries(pl);
-    }  
+		pl = adjustForBoundaries(pl);
+	}  
 
-    context.fillStyle="lime";
-    //context.fillRect(pl.x, pl.y, pl.w, pl.h);
-console.log(pl);
+	context.fillStyle="lime";
+	//context.fillRect(pl.x, pl.y, pl.w, pl.h);
+	console.log(pl);
 
-    context.drawImage(
-        pl.img, 
-        pl.img.startX, pl.img.startY,
-        pl.img.spriteWidth, pl.img.spriteHeight, 
-        pl.x,  pl.y, 
-        pl.w, pl.h
-    );
+	context.drawImage(
+		pl.img, 
+		pl.img.startX, pl.img.startY,
+		pl.img.spriteWidth, pl.img.spriteHeight, 
+		pl.x,  pl.y, 
+		pl.w, pl.h
+	);
 
-    drawAimSight();
+	drawAimSight();
 }
 
 
