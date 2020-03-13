@@ -1,9 +1,52 @@
 
-// TODOs
-// invincible 1s after being hit
-// better collision detection (wtf not hurt when collision from the side)
-// collision checks should return booleans
 
+/*
+asci titles:
+http://patorjk.com/software/taag/#p=display&c=c&f=ANSI%20Shadow&t=TODO
+*/
+
+/** 
+ *    ████████╗ ██████╗     ██████╗  ██████╗ 
+ *    ╚══██╔══╝██╔═══██╗    ██╔══██╗██╔═══██╗
+ *       ██║   ██║   ██║    ██║  ██║██║   ██║
+ *       ██║   ██║   ██║    ██║  ██║██║   ██║
+ *       ██║   ╚██████╔╝    ██████╔╝╚██████╔╝
+ *       ╚═╝    ╚═════╝     ╚═════╝  ╚═════╝ 
+
+invincibility after being hit should show
+better health system (check variables.js on PLAYER)
+better CARPET BOMBING (see createCustomMissile(), should use new Missile_Entity() )
+implement Bonus_Entity as well (not done in variables.js, see Missile_Entity() in variables.js for reference)
+
+________________________________________________________________________________
+________________________________________________________________________________
+
+
+  _    _             _         _                  _               
+ | |  | |           | |       | |                | |              
+ | |  | | _ __    __| |  __ _ | |_  ___  ___     | |  ___    __ _ 
+ | |  | || '_ \  / _` | / _` || __|/ _ \/ __|    | | / _ \  / _` |
+ | |__| || |_) || (_| || (_| || |_|  __/\__ \    | || (_) || (_| |
+  \____/ | .__/  \__,_| \__,_| \__|\___||___/    |_| \___/  \__, |
+         | |                                                 __/ |
+         |_|                                                |___/ 
+ 
+DONE 12/03: invincible 1s after being hit
+DONE 12/03: better collision detection (wtf not hurt when collision from the side)
+DONE 13/03 : collision checks should return booleans
+
+________________________________________________________________________________
+________________________________________________________________________________
+
+
+
+
+
+
+
+
+
+*/
 
 /***
  *    ██╗  ██╗███████╗██╗   ██╗    ██████╗  ██████╗ ██╗    ██╗███╗   ██╗
@@ -12,8 +55,9 @@
  *    ██╔═██╗ ██╔══╝    ╚██╔╝      ██║  ██║██║   ██║██║███╗██║██║╚██╗██║
  *    ██║  ██╗███████╗   ██║       ██████╔╝╚██████╔╝╚███╔███╔╝██║ ╚████║
  *    ╚═╝  ╚═╝╚══════╝   ╚═╝       ╚═════╝  ╚═════╝  ╚══╝╚══╝ ╚═╝  ╚═══╝
- *                                                                      
+ * 
  */
+ 
  function keyPush(evt) {
 	//console.log(evt.keyCode);
     switch(evt.keyCode) {
@@ -199,20 +243,16 @@
      *     ╚═════╝    ╚═╝  ╚═╝    ╚══════╝    ╚═╝  ╚═╝       ╚═╝       ╚═╝     ╚═════╝     ╚═╝  ╚═══╝    ╚══════╝
      *                                                                                                           
      */
-     function createMissile(dir) {
-    	if(!dir) {
-    		dir = 'c';
-    	}
-    	let missile = {
-    		x: (pl.x + (pl.w/2) - 3),
-    		y: (pl.y + (pl.h/2)),
-    		xd: mstats.xd, // x direction
-    		w: mstats.w,
-    		h: mstats.h,
-    		sy: mstats.sy, // speed Y axis
-    		sx: mstats.sx // speed Y axis
-    	};
-    	switch(dir) {
+
+     function createMissile() {
+     	createMissile('c');
+     }
+     function createMissile(direction) {
+
+    	let missile = new Missile_Entity(mstats);
+    	missile.x = (pl.x + (pl.w/2) - 3);
+    	missile.y = (pl.y + (pl.h/2));
+    	switch(direction) {
     		case 'l':  // angle to the left
     			missile.xd = -1;
     		break;
@@ -237,12 +277,13 @@
             h: data.h,
             sy: data.sy, // speed Y axis
             sx: data.sx, // speed Y axis
-            color: data.color
+            c: data.c
         };
+
         missiles.push(customMissile);
      }
 
-
+     // TODO better creation using Entities (see variables.js)
     function createBonus(name) {
     	let b = bonusesMap.get(name);
     	let randY = getRandomInt((-1*(canvas.height/3)), ((canvas.height/3)-b.h));
@@ -256,64 +297,56 @@
     		sx: randSpeedX,
     		sy: randSpeedY,
 			dirMod: 1,
-    		type: b.type
+    		type: b.type,
+            effectWhenShotAt: b.effectWhenShotAt,
+            effectWhenTouched: b.effectWhenTouched
     	};
+
     	bonuses.push(bonus);
     }
+
+
     function createItem(name) {
-    	let it = itemsMap.get(name);
-    	let goRight = Math.random() > 0.5;
-    	let randY = getRandomInt((-1*(canvas.height/3)), ((canvas.height/3)-it.h));
-    	let randx = goRight 
+    	let itemStats = itemsMap.get(name);
+    	let goRight = Math.random() > 0.5; // the first direction
+    	let randY = getRandomInt((-1*(canvas.height/3)), ((canvas.height/3)-itemStats.h));
+
+    	// TODO : store these hard value somewhere ?
+    	// changing spawning side depending on first direction
+    	let randX = goRight 
     					? getRandomInt(canvas.width * -0.3, canvas.width * 0.3) 
 						: getRandomInt(canvas.width * 0.6, canvas.width * 1.3);
 
-    	let randSpeedX = getRandomInt(it.sx[0], it.sx[1]);
-    	let randSpeedY = getRandomInt(it.sy[0], it.sy[1]);
-    	let bonus = {
-    		x: randx,
-    		y: randY,
-    		w: it.w,
-    		h: it.h,
-    		sx: randSpeedX,
-    		sy: randSpeedY,
-			dirMod: goRight ? 1 : -1,
-    		type: it.type
-    	};
-    	items.push(bonus);
+    	let randSpeedX = getRandomInt(itemStats.sx[0], itemStats.sx[1]);
+    	let randSpeedY = getRandomInt(itemStats.sy[0], itemStats.sy[1]);
+
+    	let item = new Item_Entity(itemStats);
+    	item.x = randX;
+    	item.y = randY;
+    	item.sx = randSpeedX;
+    	item.sy = randSpeedY;
+    	item.dirMod = goRight ? 1 : -1;
+    	items.push(item);
     }
     function createEnemy() {
-        let randX = getRandomInt(5, ((canvas.width-5)-ses.w));
-        let enemy = {
-            ox: randX,
-            x: randX,
-            oy: ses.y,
-            y: ses.y,
-            w: ses.w,
-            h: ses.h,
-            sx: ses.sx,
-            sy: getRandomInt(ses.sy-2, ses.sy+2),
-            c: ses.c,
-            pts: ses.pts,
-            collisionEffect: ses.collisionEffect
-        };
+        let randX = getRandomInt(5, ((canvas.width-5)-standardEnemyStats.w));
+        let enemy = new Enemy_Entity(standardEnemyStats);
+        enemy.ox = randX;
+        enemy.x = randX;
         enemies.push(enemy);
     }
+    // used for debugging purposes only
+    // static enemy near right bottom corner
     function createEnemytest() {
-        let randX = getRandomInt(5, ((canvas.width-5)-ses.w));
-        let enemy = {
-            ox: randX,
-            x: canvas.width*0.75,
-            oy: canvas.height*0.75,
-            y: canvas.height*0.75,
-            w: ses.w,
-            h: ses.h,
-            sx: 0,
-            sy: 0,
-            c: ses.c,
-            pts: ses.pts,
-            collisionEffect: ses.collisionEffect
-        };
+        let enemy = new Enemy_Entity(standardEnemyStats);
+        enemy.ox = canvas.width*0.75;
+        enemy.x = canvas.width*0.75;
+        enemy.oy = canvas.height*0.75;
+        enemy.y = canvas.height*0.75;
+        enemy.w = standardEnemyStats.w;
+        enemy.h = standardEnemyStats.h;
+        enemy.sx = 0;
+        enemy.sy = 0;
         enemies.push(enemy);
     }
 
@@ -342,9 +375,9 @@
     		missiles.splice(indx,1);
     	}
     }
-    function checkEntityCollisionWithMissiles(entity, entities, indw, effect) {
-    	for(let j=0; j<missiles.length; j++) {
-    		let m = missiles[j];
+    function checkEntityCollisionWithMissiles_getMissileIndex(entity) {
+    	for(let mIndex = 0; mIndex < missiles.length; mIndex++) {
+    		let m = missiles[mIndex];
     		
     		if(
     			(
@@ -356,21 +389,10 @@
     				&& entity.y <= (m.y+m.h)
     			)
     		) {
-    			// TODO should return TRUE or FALSE and management should be in parent's method
-    			if(effect == 'hitEntity') {
-    				addRage(50);
-    				settings.score += entity.pts;
-    				entities.splice(indw,1);
-    				missiles.splice(j,1);
-    			}
-    			if(effect == 'blockMissile') {
-    				missiles.splice(j,1);
-    			}
+    			return mIndex;
     		}
-    		// X axis check by missile's MIDDLE
-    		// entity.x < mmid
-    		// && (entity.x+entity.w) > mmid
     	}
+		return -1;
     }
     function checkEntitiesCollisionWithPlayer(entities) {
     	for(let j=0; j<entities.length; j++) {
@@ -492,9 +514,15 @@ function drawBonuses() {
 		checkBonusOutOfBounds(b,i);
 		animateBonus(b,i);
 	    context.fillRect(b.x, b.y, b.w, b.h);
-	    let effect = '';
-	   
-	    checkEntityCollisionWithMissiles(b, bonuses, i, effect);
+		
+		// punish if shooting a bonus ?
+	    /*
+	    missileIndex = checkEntityCollisionWithMissiles_getMissileIndex(b);
+	    if(missileIndex != -1) {
+	    }
+	    */
+
+	    // picking it up
 	    if(checkEntityCollisionWithPlayer(b)) {
 
 	    }
@@ -507,15 +535,26 @@ function drawItems() {
 		checkBonusOutOfBounds(it,i);
 		animateBonus(it,i);
 	    context.fillRect(it.x, it.y, it.w, it.h);
-	    let effect = '';
-	    switch(it.type) {
-	    	case 'asteroid':
-	    		effect = 'blockMissile'
-	    	break;
+	    
+	    let missileIndex = checkEntityCollisionWithMissiles_getMissileIndex(it);
+	    if(missileIndex != -1) {
+			if(it.effectWhenShotAt == 'getHit') {
+				addRage(50);
+				settings.score += it.pts;
+				items.splice(i,1);
+				missiles.splice(missileIndex,1);
+			}
+			if(it.effectWhenShotAt == 'blockShot') {
+				missiles.splice(missileIndex,1);
+			}
 	    }
-	    checkEntityCollisionWithMissiles(it, items, i, effect);
 	    if(checkEntityCollisionWithPlayer(it)) {
-			addHealth(-20);
+			if(it.effectWhenTouched.indexOf('doDamage') != -1) {
+				addHealth(-20);
+			}
+			if(it.effectWhenTouched.indexOf('getHit') != -1) {
+				items.splice(i,1);
+			}
 	    }
     }
 }
@@ -523,7 +562,7 @@ function drawMissiles() {
 	for(let i=0; i<missiles.length; i++) {
 
 		let m = missiles[i];
-		context.fillStyle='green';
+		context.fillStyle = m.c;
 		checkMissileOutOfBounds(m,i);
 		animateMissile(m);
 	    context.fillRect(m.x, m.y, m.w, m.h);
@@ -537,9 +576,21 @@ function drawEnemies() {
 		animateEnemy(en);
 
 	    context.fillRect(en.x, en.y, en.w, en.h);
-	    checkEntityCollisionWithMissiles(en, enemies, i, 'hitEntity');
 
+	    let missileIndex = checkEntityCollisionWithMissiles_getMissileIndex(en);
+	    if(missileIndex != -1) {
+			if(en.effectWhenShotAt == 'getHit') {
+				addRage(50);
+				settings.score += en.pts;
+				enemies.splice(i,1);
+				missiles.splice(missileIndex,1);
+			}
+			if(en.effectWhenShotAt == 'blockMissile') {
+				missiles.splice(missileIndex,1);
+			}
+	    }
 	    if(checkEntityCollisionWithPlayer(en)) {
+	    	//getHit;doDamage
 			addHealth(-40);
 	    }
 
@@ -616,7 +667,6 @@ function drawPlayer() {
 
 	context.fillStyle="lime";
 	//context.fillRect(pl.x, pl.y, pl.w, pl.h);
-	console.log(pl);
 
 	context.drawImage(
 		pl.img, 
@@ -676,7 +726,7 @@ function drawPlayer() {
                 carpetBombingData.y -= carpetBombingData.h*3;
                 isFiring = true;
                 wasFiring = true;
-                    createCustomMissile(carpetBombingData)
+                createCustomMissile(carpetBombingData)
                 //createMissile();
                 carpetbombingTimeout = setTimeout(function() {
                     isFiring = false;
