@@ -48,6 +48,13 @@ var Entity_Template = function(settings) {
 	this.h = settings.h;
 	this.sx = settings.sx; // speed x
 	this.sy = settings.sy; // speed y
+	this.ms = settings.ms; // MAX speed
+
+	this.hp = settings.hp;
+	this.mHp = settings.mHp;
+	this.shield = settings.shield;
+	this.mshield = settings.mshield;
+
 	this.c = settings.c; // color
 }
 
@@ -67,28 +74,7 @@ var Entity_Template = function(settings) {
  *    ██║     ███████╗██║  ██║   ██║   ███████╗██║  ██║                                    
  *    ╚═╝     ╚══════╝╚═╝  ╚═╝   ╚═╝   ╚══════╝╚═╝  ╚═╝              
  */
- var pl = {
-	x: settings.canvasWidth/3,
-	y: settings.canvasHeight - 48,
-	w: 24,
-	h: 42,
-	ms: 4, // MAX speed
-	sx: 0, // speed x
-	sy: 0, // speed y
-	isSpeedingUp: false,
-	wasSpeedingUp: false,
-	isRageAvailable: false,
-	isInvincible: false,
-	effectWhenShotAt: '',
-	effectWhenTouched: '',
-	img: new Image()
-}
-pl.img.src = "img/spaceshipsprites.gif";
-pl.img.startX = 39;
-pl.img.startY = 39;
-pl.img.spriteWidth = 39;
-pl.img.spriteHeight = 39;
-
+var pl;
 // TODO better health system : currently health is based on div#healthBar's pixel width (max = 200px). wtf.
 var fullHealthWidth =  1*(getComputedStyle(document.getElementById('healthBar')).width.split('px')[0]);
 var fullRageWidth =  1*(getComputedStyle(document.getElementById('rageBar')).width.split('px')[0]);
@@ -102,12 +88,19 @@ var playerSettings = {
 	ms: 4, // MAX speed
 	sx: 0, // speed x
 	sy: 0, // speed y
+
+	hp: 100,
+	mHp: 100,
+	shield: 50,
+	mshield: 50,
+	dmg: 1,
 	isSpeedingUp: false,
 	wasSpeedingUp: false,
 	isRageAvailable: false,
 	isInvincible: false,
 	effectWhenShotAt: '',
 	effectWhenTouched: '',
+
 	img: {
 		src: "img/spaceshipsprites.gif",
 		startX: 39,
@@ -118,6 +111,7 @@ var playerSettings = {
 }
 var Player_Entity = function(settings) {
   	Entity_Template.call(this, settings);
+  	this.dmg = settings.dmg;
 
 	this.isSpeedingUp = settings.isSpeedingUp;
 	this.wasSpeedingUp = settings.wasSpeedingUp;
@@ -125,6 +119,7 @@ var Player_Entity = function(settings) {
 	this.isInvincible = settings.isInvincible;
 	this.effectWhenShotAt = settings.effectWhenShotAt;
 	this.effectWhenTouched = settings.effectWhenTouched;
+
 	this.img = new Image();
 	this.img.src = settings.img.src;
 	this.img.startX = settings.img.startX;
@@ -256,9 +251,14 @@ var standardEnemyStats = {
 	oy: -72,
 	w: 24,
 	h: 48,
+
 	sx: 0,
-	sy: 4,
+	sy: 1,
 	c: 'tomato',
+
+	hp: 2,
+	mHp: 2,
+	dmg: 1,
 	pts: 5,
 	effectWhenShotAt: 'getHit',
 	effectWhenTouched: 'getHit;doDamage'
@@ -268,6 +268,7 @@ var Enemy_Entity = function(settings) {
   	Entity_Template.call(this, settings);
   	this.ox = settings.ox;
 	this.oy = settings.oy;
+	this.dmg = settings.dmg;
 	this.pts = settings.pts;
 	this.effectWhenShotAt = settings.effectWhenShotAt;
 	this.effectWhenTouched = settings.effectWhenTouched;
@@ -351,23 +352,27 @@ var carpetBombingData = {
     h: 22,
     sx: 12,
     sy: 8,
+    dmg: 10,
     c: 'blue'
 }
 
 // missiles stats
 var mstats = {
-		x: null,
-		y: null,
-		xd: 0, // x direction
-		w: 6,
-		h: 6,
-		sx: 0, // speed X axis
-		sy: 14, // speed Y axis
-		c: 'green'
-	}
+	x: null,
+	y: null,
+	xd: 0, // x direction
+	w: 6,
+	h: 6,
+	sx: 0, // speed X axis
+	sy: 14, // speed Y axis
+ 	dmg: 1,
+	c: 'green'
+}
 
 var Missile_Entity = function(settings) {
   	Entity_Template.call(this, settings);
+
+ 	this.dmg = settings.dmg;
 	this.xd = settings.xd; // x direction, 0 by default means NO side deviations
 }
 // let myNewMissile = new Missile_Entity(mstats);
@@ -448,7 +453,7 @@ itemsMap.set(
 		dirMod: 1, // direction modifier : 1 or -1
 		type: 'asteroid',
 		effectWhenShotAt: 'blockShot',
-		effectWhenTouched: 'getHit;doDamage'
+		effectWhenTouched: 'doDamage'
 
 	}
 );

@@ -30,10 +30,11 @@ ________________________________________________________________________________
   \____/ | .__/  \__,_| \__,_| \__|\___||___/    |_| \___/  \__, |
          | |                                                 __/ |
          |_|                                                |___/ 
- 
+
+DONE 14/03 : adjustable damages (in missile entity)
+DONE 13/03 : collision checks should return booleans
 DONE 12/03: invincible 1s after being hit
 DONE 12/03: better collision detection (wtf not hurt when collision from the side)
-DONE 13/03 : collision checks should return booleans
 
 ________________________________________________________________________________
 ________________________________________________________________________________
@@ -277,7 +278,8 @@ ________________________________________________________________________________
             h: data.h,
             sy: data.sy, // speed Y axis
             sx: data.sx, // speed Y axis
-            c: data.c
+            c: data.c,
+            dmg: data.dmg
         };
 
         missiles.push(customMissile);
@@ -338,7 +340,7 @@ ________________________________________________________________________________
     // used for debugging purposes only
     // static enemy near right bottom corner
     function createEnemytest() {
-        let enemy = new Enemy_Entity(standardEnemyStats);
+        var enemy = new Enemy_Entity(standardEnemyStats);
         enemy.ox = canvas.width*0.75;
         enemy.x = canvas.width*0.75;
         enemy.oy = canvas.height*0.75;
@@ -538,13 +540,13 @@ function drawItems() {
 	    
 	    let missileIndex = checkEntityCollisionWithMissiles_getMissileIndex(it);
 	    if(missileIndex != -1) {
-			if(it.effectWhenShotAt == 'getHit') {
+			if(it.effectWhenShotAt.indexOf('getHit') != -1) {
 				addRage(50);
 				settings.score += it.pts;
 				items.splice(i,1);
 				missiles.splice(missileIndex,1);
 			}
-			if(it.effectWhenShotAt == 'blockShot') {
+			if(it.effectWhenShotAt.indexOf('blockShot') != -1) {
 				missiles.splice(missileIndex,1);
 			}
 	    }
@@ -577,21 +579,36 @@ function drawEnemies() {
 
 	    context.fillRect(en.x, en.y, en.w, en.h);
 
+	    // shooting checks
 	    let missileIndex = checkEntityCollisionWithMissiles_getMissileIndex(en);
 	    if(missileIndex != -1) {
-			if(en.effectWhenShotAt == 'getHit') {
+			if(en.effectWhenShotAt.indexOf('getHit') != -1) {
 				addRage(50);
 				settings.score += en.pts;
-				enemies.splice(i,1);
+				en.hp -= missiles[missileIndex].dmg;
+				if(en.hp <= 0) {
+					en.hp = 0;
+					enemies.splice(i,1);
+				}
 				missiles.splice(missileIndex,1);
+				
 			}
-			if(en.effectWhenShotAt == 'blockMissile') {
+			if(en.effectWhenShotAt.indexOf('blockMissile') != -1) {
 				missiles.splice(missileIndex,1);
 			}
 	    }
+
+	    // direct collision checks
 	    if(checkEntityCollisionWithPlayer(en)) {
-	    	//getHit;doDamage
-			addHealth(-40);
+			if(en.effectWhenTouched.indexOf('getHit') != -1) {
+				addRage(50);
+				settings.score += 1;
+				// TODO should use "en.hp -= pl.dmgOnDirectHit" or something
+				enemies.splice(i,1);
+			}
+			if(en.effectWhenTouched.indexOf('doDamage') != -1) {
+				addHealth(-40);
+			}
 	    }
 
 	    
@@ -992,6 +1009,12 @@ function speedDownPlayer() {
     	context.fillText(('score: '+ settings.score), 50, 100);
     }
 
+    function writeDebug() {
+    	context.font = '44px consolas';
+    	context.fillStyle = "white";
+    	context.fillText(('debug: '+ debug), 10, 200);
+    }
+
 
 
 
@@ -1053,6 +1076,8 @@ function speedDownPlayer() {
     	bgs.d.src = "img/bg01.png";
     	bgs.t = new Image(); // top
     	bgs.t.src = "img/bg01.png";
+
+    	pl = new Player_Entity(playerSettings);
     	// game loop starts when background ready
     	bgs.d.onload = function(){
     	    updateLoop = setInterval(update, 1000/60);
