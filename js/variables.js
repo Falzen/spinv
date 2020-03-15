@@ -23,10 +23,11 @@ var settings = {
 	canvasWidth: 450,
 	canvasHeight: 800,
 	backgroundSpeeds: {
-		y: 4, // default, should be function of enemies number
+		y: 2, // default, should be function of something :)
 		x: 0 // going sideways (no)
 	},
-	score: 200
+	score: 200,
+	fps: 60
 }
 // engine mechanics
 var updateLoop;
@@ -40,6 +41,11 @@ var bonusSpawningTimer = 1200;
 // spawn items
 var isItemsSpawning = true;
 var itemsSpawningTimer = 1200;
+
+var mousePos = {
+	x: 0,
+	y: 0
+}
 
 var Entity_Template = function(settings) {
 	this.x = settings.x;
@@ -252,14 +258,14 @@ var standardEnemyStats = {
 	w: 24,
 	h: 48,
 
-	sx: 0,
-	sy: 1,
+	sx: 4,
+	sy: [3,5],
 	c: 'tomato',
 
-	hp: 2,
+	hp: 1,
 	mHp: 2,
 	dmg: 1,
-	pts: 5,
+	pts: 10,
 	effectWhenShotAt: 'getHit',
 	effectWhenTouched: 'getHit;doDamage'
 };

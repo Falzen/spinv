@@ -58,7 +58,7 @@ ________________________________________________________________________________
  *    ╚═╝  ╚═╝╚══════╝   ╚═╝       ╚═════╝  ╚═════╝  ╚══╝╚══╝ ╚═╝  ╚═══╝
  * 
  */
- 
+ /*
  function keyPush(evt) {
 	//console.log(evt.keyCode);
     switch(evt.keyCode) {
@@ -94,7 +94,7 @@ ________________________________________________________________________________
 		case 80: btns.pause = !btns.pause; break;
     }
 }
-
+*/
 
 
 
@@ -113,6 +113,7 @@ ________________________________________________________________________________
  *    ╚═╝  ╚═╝╚══════╝   ╚═╝        ╚═════╝ ╚═╝     
  *                                                  
  */
+/*
  function keyLetGo(evt) {
     switch(evt.keyCode) {
 		// NUMPAD 0
@@ -142,6 +143,165 @@ ________________________________________________________________________________
 		case 39: dirs.arrowRight = false; break; 
 	}
 }
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+General Input manager (awesome)
+add(key, down, up) : 
+	creates a new keydown-keyup event listsner.
+	@key: used to detect which key is live using event.keyCode
+	@down: callback function to be executed when event is keydown
+	@up: callback function to be executed when event is keyup
+
+*/
+Controller = {
+    keyIsDown: [],
+
+    // Add a new control. up is optional.
+    // It avoids key repetitions
+    add: function (key, down, up) {
+        
+        document.addEventListener('keydown', function(e) {
+            if(e.keyCode === key && !Controller.keyIsDown[key]) {
+                down();
+                Controller.keyIsDown[key] = true;
+            }
+        })
+
+        document.addEventListener('keyup', function(e) {
+            if(e.keyCode === key) {
+                if(up) {
+                	up();
+                }
+                Controller.keyIsDown[key] = false;
+                
+            }
+        })
+    },
+}
+
+
+Controller.add(37,
+    function () {
+        dirs.arrowLeft = true;
+	}, function() {
+        dirs.arrowLeft = false;
+});
+
+
+Controller.add(38,
+    function () {
+        dirs.arrowUp = true;
+	}, function() {
+		dirs.arrowUp = false;
+});
+
+Controller.add(39,
+    function () {
+        dirs.arrowRight = true;
+	}, function() {
+		dirs.arrowRight = false;
+});
+
+
+Controller.add(40,
+    function () {
+        dirs.arrowDown = true;
+	}, function() {
+		dirs.arrowDown = false;
+});
+
+Controller.add(90,
+    function () {
+        dirs.up = true;
+	}, function() {
+		dirs.up = false;
+});
+
+Controller.add(81,
+    function () {
+        dirs.left = true;
+	}, function() {
+		dirs.left = false;
+});
+
+Controller.add(83,
+    function () {
+        dirs.down = true;
+	}, function() {
+		dirs.down = false;
+});
+
+Controller.add(68,
+    function () {
+        dirs.right = true;
+	}, function() {
+		dirs.right = false;
+});
+
+Controller.add(80,
+    function () {
+        btns.pause = !btns.pause;
+	}, function() {
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -183,7 +343,13 @@ ________________________________________________________________________________
 		dirs.arrowDown
 		&& pl.isRageAvailable == true
 	) {
+		canvas.classList.add('flash-all'); // removed at the end of carpetBombing();
         carpetBombing();
+	}
+	if(
+		dirs.arrowRight
+	) {
+
 	}
 }
 
@@ -249,7 +415,6 @@ ________________________________________________________________________________
      	createMissile('c');
      }
      function createMissile(direction) {
-
     	let missile = new Missile_Entity(mstats);
     	missile.x = (pl.x + (pl.w/2) - 3);
     	missile.y = (pl.y + (pl.h/2));
@@ -331,10 +496,12 @@ ________________________________________________________________________________
     	items.push(item);
     }
     function createEnemy() {
-        let randX = getRandomInt(5, ((canvas.width-5)-standardEnemyStats.w));
+        let randX = getRandomInt(5, ((canvas.width-5)-standardEnemyStats.w-15));
+        let randYspeed = getRandomInt(standardEnemyStats.sy[0], standardEnemyStats.sy[1]);
         let enemy = new Enemy_Entity(standardEnemyStats);
         enemy.ox = randX;
         enemy.x = randX;
+        enemy.sy = randYspeed;
         enemies.push(enemy);
     }
     // used for debugging purposes only
@@ -488,7 +655,7 @@ var relativeSpeedY = 0;
  	return (pl.y * 100) / canvas.height;
  }
  function drawScene() {
- 	relativeSpeedY = 1+(1-(getPlayerPosY_inPercents()/95)*1.9);
+ 	relativeSpeedY = 1+(1-(settings.score/1000));
  	
 	bgPositions.d.y += settings.backgroundSpeeds.y*relativeSpeedY;
 	bgPositions.t.y += settings.backgroundSpeeds.y*relativeSpeedY;
@@ -503,11 +670,11 @@ var relativeSpeedY = 0;
 	context.drawImage(bgs.t, bgPositions.t.x, bgPositions.t.y, canvas.width, canvas.height);
 }
 function drawAimSight() {
-	let grd = context.createLinearGradient(pl.x, pl.y, pl.x, pl.y-500);
+	let grd = context.createLinearGradient(pl.w/2, 0, pl.w/2, 500);
 	grd.addColorStop(0,"blue");
 	grd.addColorStop(1,"transparent");
     context.fillStyle=grd;
-    context.fillRect(pl.x + (pl.w/2), 0, 1, pl.y);
+    context.fillRect(0 + (pl.w/2), 0, 1, pl.y);
 }
 function drawBonuses() {
 	context.fillStyle="red";
@@ -616,6 +783,7 @@ function drawEnemies() {
 }
 
 function drawPlayer() {
+    context.save();
 	pl.img.startX = pl.img.spriteWidth;
 	pl.img.startY = 0;
 	// set position if moving
@@ -683,19 +851,65 @@ function drawPlayer() {
 	}  
 
 	context.fillStyle="lime";
-	//context.fillRect(pl.x, pl.y, pl.w, pl.h);
-
+	let radians = getFacingMouseRotation_inRadians();
+	context.save();
+    context.translate(pl.x, pl.y+pl.h);
+	context.rotate(-radians);
 	context.drawImage(
 		pl.img, 
 		pl.img.startX, pl.img.startY,
 		pl.img.spriteWidth, pl.img.spriteHeight, 
-		pl.x,  pl.y, 
+		0, 0, // because canvas "pencil" is translated due to rotation
 		pl.w, pl.h
 	);
 
 	drawAimSight();
+    context.restore(); // restore default transform;;
+
+    // hitbox
+	context.fillStyle="rgba(20,255,20,0.5)";
+    context.fillRect(pl.x, pl.y, pl.w, pl.h);
 }
 
+
+/**
+	@ mouseevent : standard JS mouseevent
+	return : {xpos: int, ypos: int};
+*/
+function findMouseCoords(mouseEvent) {
+	var obj = document.getElementById("canvas");
+	var obj_left = obj.offsetParent.offsetLeft;
+	var obj_top = obj.offsetParent.offsetTop;
+	var xpos;
+	var ypos;
+
+
+	if (mouseEvent) { //FireFox
+		xpos = mouseEvent.pageX;
+		ypos = mouseEvent.pageY;
+	} else { //IE
+		xpos = window.event.x + document.body.scrollLeft - 2;
+		ypos = window.event.y + document.body.scrollTop - 2;
+	}
+	mousePos.x = xpos - obj_left;
+	mousePos.y = ypos - obj_top;
+	console.log(mousePos.x);
+}
+
+function setMousePos(mouseEvent) {
+	let rect = canvas.getBoundingClientRect();
+	let mouseX = mouseEvent.clientX - rect.left;
+	let mouseY = mouseEvent.clientY - rect.top;
+	mousePos.x = mouseX;
+	mousePos.y = mouseY;
+}
+function getFacingMouseRotation_inRadians(){
+    let center_x = pl.x + (pl.w/2);
+    let center_y = (pl.y) + (pl.h/2);
+    let radians = Math.atan2(mousePos.x - center_x, mousePos.y - center_y);
+    //var degree = (radians * (180 / Math.PI) * -1) + 180; 
+    return radians;
+}
 
 
 
@@ -752,6 +966,7 @@ function drawPlayer() {
                     	isFiring = false;
                     	carpetBombingData.y = carpetBombingData.oy;
         				resetRage();
+        				canvas.classList.remove('flash-all');
                         clearInterval(carpetbombingTimeout);
                     }
                 }, firingRate);
@@ -1045,6 +1260,10 @@ function speedDownPlayer() {
 	    	drawBonuses();
 	    	drawItems();
 	    	writeScore();
+
+		    setTimeout(function() {
+				update()
+		    }, 1000/settings.fps);
 	    }
     }
 
@@ -1067,6 +1286,7 @@ function speedDownPlayer() {
      window.onload = function() {
     	// injecting DOM
         canvas = document.createElement("canvas");
+        canvas.setAttribute("id", "canvas");
         canvas.width = 450;
         canvas.height = 800;
         document.getElementById('game').appendChild(canvas);
@@ -1080,12 +1300,20 @@ function speedDownPlayer() {
     	pl = new Player_Entity(playerSettings);
     	// game loop starts when background ready
     	bgs.d.onload = function(){
-    	    updateLoop = setInterval(update, 1000/60);
+    	    //updateLoop = setInterval(update, 1000/settings.fps);
+    	    update();
     	}
 
         // init event listeners
+	    document.addEventListener('mousemove', setMousePos);
+    	
+        /*
+        // replaced by var Controller
         document.addEventListener('keydown',keyPush);
     	document.addEventListener("keyup", keyLetGo);
+    	*/
+
+
     	// init creation loops
     	
         spawnEnemies();

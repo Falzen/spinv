@@ -81,3 +81,14 @@ td.left {
 td.right {
 	text-align: right;
 }
+
+
+
+.flash-all {
+	animation: flashAll_animation 0.15s infinite;
+	transition: all 0.15s ease;
+}
+@keyframes flashAll_animation {
+  0%   { filter: blur(0); }
+  100% { filter: blur(1px); }
+}
