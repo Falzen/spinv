@@ -17,6 +17,7 @@ invincibility after being hit should show
 better health system (check variables.js on PLAYER)
 better CARPET BOMBING (see createCustomMissile(), should use new Missile_Entity() )
 implement Bonus_Entity as well (not done in variables.js, see Missile_Entity() in variables.js for reference)
+thinner hitbox when going sideways
 
 ________________________________________________________________________________
 ________________________________________________________________________________
@@ -266,6 +267,7 @@ ________________________________________________________________________________
     	}
     	missiles.push(missile);
     	settings.score -= 1;
+    	statistics.shootCount++;
     }
 
      function createCustomMissile(data) {
@@ -582,6 +584,7 @@ function drawEnemies() {
 	    // shooting checks
 	    let missileIndex = checkEntityCollisionWithMissiles_getMissileIndex(en);
 	    if(missileIndex != -1) {
+	    	statistics.hitCount++;
 			if(en.effectWhenShotAt.indexOf('getHit') != -1) {
 				addRage(50);
 				settings.score += en.pts;
@@ -589,6 +592,7 @@ function drawEnemies() {
 				if(en.hp <= 0) {
 					en.hp = 0;
 					enemies.splice(i,1);
+					statistics.killCount++;
 				}
 				missiles.splice(missileIndex,1);
 				
@@ -689,9 +693,13 @@ function drawPlayer() {
 		pl.img, 
 		pl.img.startX, pl.img.startY,
 		pl.img.spriteWidth, pl.img.spriteHeight, 
-		pl.x,  pl.y, 
-		pl.w, pl.h
+		pl.x-4,  pl.y-4, 
+		pl.img.spriteWidth, pl.img.spriteHeight
 	);
+
+	// hitbox
+	context.fillStyle="rgba(20,220,20,0.1)";
+    context.fillRect(pl.x, pl.y, pl.w, pl.h);
 
 	drawAimSight();
 }
@@ -1009,6 +1017,18 @@ function speedDownPlayer() {
     	context.fillText(('score: '+ settings.score), 50, 100);
     }
 
+    function writeStatistics() {
+
+    	context.font = '16px consolas';
+    	context.fillStyle = "white";
+    	context.fillText(('shot: '+ statistics.shootCount), 10, (canvas.height - 10));
+    	context.fillText(('hit: '+ statistics.hitCount), 110, (canvas.height - 10));
+    	let average = Math.round((statistics.hitCount*100)/statistics.shootCount);
+    	average = isNaN(average) ? 0 : average;
+    	context.fillText(('average: '+ average + ' %'), 210, (canvas.height - 10));
+    	
+    }
+
     function writeDebug() {
     	context.font = '44px consolas';
     	context.fillStyle = "white";
@@ -1039,12 +1059,12 @@ function speedDownPlayer() {
 	    	drawScene();
 	    	drawPlayer();
 	    	actionsManager();
-
 	    	drawMissiles();
 	    	drawEnemies();
 	    	drawBonuses();
 	    	drawItems();
 	    	writeScore();
+	    	writeStatistics();
 	    }
     }
 

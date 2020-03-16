@@ -28,12 +28,20 @@ var settings = {
 	},
 	score: 200
 }
+
+var statistics = {
+	killCount: 0,
+	shootCount: 0,
+	hitCount: 0,
+
+}
 // engine mechanics
 var updateLoop;
 var friction = 0.89
 // spawnEnemies
 var enemySpawningTimer = 800;
 var isEnemiesSpawning = true;
+
 // spawnBonuses
 var isBonusesSpawning = true;
 var bonusSpawningTimer = 1200;
@@ -83,8 +91,8 @@ var domRageAmount = document.getElementById('rageAmount');
 var playerSettings = {
 	x: settings.canvasWidth/3,
 	y: settings.canvasHeight - 48,
-	w: 24,
-	h: 42,
+	w: 39-8,
+	h: 39-8,
 	ms: 4, // MAX speed
 	sx: 0, // speed x
 	sy: 0, // speed y
