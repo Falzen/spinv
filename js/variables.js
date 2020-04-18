@@ -65,8 +65,10 @@ var Entity_Template = function(settings) {
 
 	this.c = settings.c; // color
 }
+var isOnHomeMenu = true;
 
-
+// init in initLateVariables(), called after canvas exists
+var homeMenuChoices = [];
 
 
 

@@ -351,8 +351,43 @@ ________________________________________________________________________________
         enemy.h = standardEnemyStats.h;
         enemy.sx = 0;
         enemy.sy = 0;
-        enemies.push(enemy);
-    }
+		enemies.push(enemy);
+		
+
+		
+	}
+
+	function createHomeMenuChoices() {
+		for (let i = 0; i < homeMenuChoices.length; i++) {
+			const choice = homeMenuChoices[i];
+			let missileIndex = checkEntityCollisionWithMissiles_getMissileIndex(choice);
+			if(missileIndex != -1) {
+				missiles.splice(missileIndex,1);
+				initGameEntitiesOnGameStart();
+				isOnHomeMenu = false;
+			}
+			drawHomeMenuChoice(choice);
+			
+		}
+	}
+	function initGameEntitiesOnGameStart() {
+		spawnEnemies();
+		spawnBonuses();
+		spawnItems();
+	}
+	function drawHomeMenuChoice(choice) {
+		context.save();
+		
+		context.fillStyle = choice.backColor;
+		context.fillRect(choice.x, choice.y, choice.w, choice.h);
+		
+		context.font = choice.font;
+		context.fillStyle = choice.fillStyle;
+		context.textAlign = choice.textAlign;
+		context.textBaseline = choice.textBaseline;
+		context.fillText(choice.text, choice.textPos.x, choice.textPos.y); // 1.8 should be 2, small cosmetic adjustment
+		context.restore();
+	}
 
 
 
@@ -1040,7 +1075,12 @@ function speedDownPlayer() {
      	if(!btns.pause) {
 	    	drawScene();
 	    	drawPlayer();
-	    	actionsManager();
+			actionsManager();
+			if(isOnHomeMenu) {
+				createHomeMenuChoices();
+				drawMissiles();
+				return;
+			}
 	    	drawMissiles();
 	    	drawEnemies();
 	    	drawBonuses();
@@ -1049,7 +1089,6 @@ function speedDownPlayer() {
 	    	writeStatistics();
 	    }
     }
-
 
 
 
@@ -1079,9 +1118,10 @@ function speedDownPlayer() {
     	bgs.t = new Image(); // top
     	bgs.t.src = "img/bg01.png";
 
-    	pl = new Player_Entity(playerSettings);
+		pl = new Player_Entity(playerSettings);
     	// game loop starts when background ready
     	bgs.d.onload = function(){
+			initLateVariables();
     	    updateLoop = setInterval(update, 1000/60);
     	}
 
@@ -1089,10 +1129,32 @@ function speedDownPlayer() {
         document.addEventListener('keydown',keyPush);
     	document.addEventListener("keyup", keyLetGo);
     	// init creation loops
-    	
-        spawnEnemies();
-        // createEnemytest();
-    	
-        //spawnBonuses();
-    	spawnItems();
+		
+		createHomeMenuChoices();
+        // spawnEnemies();
+        // spawnBonuses();
+    	// spawnItems();
     }
+
+	function initLateVariables() {
+		
+		homeMenuChoices = [
+			{
+				name: 'start',
+				text: 'START',
+				x: canvas.width/6,
+				y: canvas.width/6,
+				w: canvas.width/3,
+				h: canvas.width/6,
+				backColor: 'tomato',
+				font: '30px Comic Sans MS',
+				fillStyle: 'white',
+				textAlign: 'center',
+				textBaseline: 'middle',
+				textPos: {
+					x: (canvas.width/6 + ((canvas.width/3)/2)), // btnBox.x + (btnBox.w/2)
+					y: (canvas.width/6 + ((canvas.width/6)/1.8)) // btnBox.y + (btnBox.h/1.8)
+				}
+			}
+		];
+	}
