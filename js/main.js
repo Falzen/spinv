@@ -398,29 +398,11 @@ ________________________________________________________________________________
     	}
 		return -1;
     }
-    function checkEntitiesCollisionWithPlayer(entities) {
-    	for(let j=0; j<entities.length; j++) {
-    		let entity = entities[j];
-    		if(
-    			(
-    				entity.x < (pl.x + pl.w) 
-    				&& (entity.x + entity.w) > pl.x
-    			) 
-    			&& 
-    			(
-    				entity.y < (pl.y + pl.h) 
-    				&& (entity.y + entity.h) > pl.y
-    			) 
-    		) {
-    			entities.splice(j,1);
-    		}
-    	}
-    }
     function checkEntityCollisionWithPlayer(entity) {
 		if(
 			(
-				entity.x < (pl.x + pl.w) 
-				&& (entity.x + entity.w) > pl.x
+				entity.x < (pl.x + pl.w-playerSettings.hitboxMargin) 
+				&& (entity.x + entity.w) > (pl.x + playerSettings.hitboxMargin)
 			) 
 			&&
 			(
@@ -682,7 +664,7 @@ function drawPlayer() {
 		pl.sy *= friction;
 		pl.x += pl.sx
 		pl.y += pl.sy
-		//checkEntitiesCollisionWithPlayer(enemies);
+
 		pl = adjustForBoundaries(pl);
 	}  
 
@@ -694,12 +676,12 @@ function drawPlayer() {
 		pl.img.startX, pl.img.startY,
 		pl.img.spriteWidth, pl.img.spriteHeight, 
 		pl.x-4,  pl.y-4, 
-		pl.img.spriteWidth, pl.img.spriteHeight
+		pl.img.spriteWidth-8, pl.img.spriteHeight
 	);
 
 	// hitbox
 	context.fillStyle="rgba(20,220,20,0.1)";
-    context.fillRect(pl.x, pl.y, pl.w, pl.h);
+    context.fillRect(pl.x, pl.y, pl.w-8, pl.h);
 
 	drawAimSight();
 }

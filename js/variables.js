@@ -91,10 +91,11 @@ var domRageAmount = document.getElementById('rageAmount');
 var playerSettings = {
 	x: settings.canvasWidth/3,
 	y: settings.canvasHeight - 48,
-	w: 39-8,
-	h: 39-8,
+	w: 39-8, // hitboxMargin*2
+	h: 39-8, // hitboxMargin*2
+	hitboxMargin: 4,
 	ms: 4, // MAX speed
-	sx: 0, // speed x
+	sx: 0, // speed x 
 	sy: 0, // speed y
 
 	hp: 100,
