@@ -352,9 +352,6 @@ ________________________________________________________________________________
         enemy.sx = 0;
         enemy.sy = 0;
 		enemies.push(enemy);
-		
-
-		
 	}
 
 	function createHomeMenuChoices() {
