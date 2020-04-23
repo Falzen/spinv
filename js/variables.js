@@ -39,14 +39,14 @@ var statistics = {
 var updateLoop;
 var friction = 0.89
 // spawnEnemies
+var isEnemiesSpawning = false;
 var enemySpawningTimer = 800;
-var isEnemiesSpawning = true;
 
 // spawnBonuses
-var isBonusesSpawning = true;
+var isBonusesSpawning = false;
 var bonusSpawningTimer = 1200;
 // spawn items
-var isItemsSpawning = true;
+var isItemsSpawning = false;
 var itemsSpawningTimer = 1200;
 
 var Entity_Template = function(settings) {
@@ -271,7 +271,16 @@ var standardEnemyStats = {
 	dmg: 1,
 	pts: 5,
 	effectWhenShotAt: 'getHit',
-	effectWhenTouched: 'getHit;doDamage'
+	effectWhenTouched: 'getHit;doDamage',
+
+	explosionSprite: {
+		src: "img/explosion_sprite.png",
+		startX: 0,
+		startY: 0,
+		spriteWidth: 64,
+		spriteHeight: 64
+	}
+
 };
 
 var Enemy_Entity = function(settings) {
@@ -282,6 +291,17 @@ var Enemy_Entity = function(settings) {
 	this.pts = settings.pts;
 	this.effectWhenShotAt = settings.effectWhenShotAt;
 	this.effectWhenTouched = settings.effectWhenTouched;
+	
+	this.isExploding = false;
+	this.explosionSprite = new Image();
+	this.explosionSprite.src = settings.explosionSprite.src;
+	this.explosionSprite.startX = settings.explosionSprite.startX;
+	this.explosionSprite.startY = settings.explosionSprite.startY;
+	this.explosionSprite.spriteWidth = settings.explosionSprite.spriteWidth;
+	this.explosionSprite.spriteHeight = settings.explosionSprite.spriteHeight;
+	this.explosionSprite.nbFramesCount = 0;
+	this.explosionSprite.nbFramesTotal = 40;
+	this.explosionSprite.nbFramesPerRow = 8;
 }
 // let myNewStandardEnemy = new Enemy_Entity(ses);
 
@@ -368,6 +388,7 @@ var carpetBombingData = {
 
 // missiles stats
 var mstats = {
+	type: 'playerMissile',
 	x: null,
 	y: null,
 	xd: 0, // x direction
@@ -381,7 +402,7 @@ var mstats = {
 
 var Missile_Entity = function(settings) {
   	Entity_Template.call(this, settings);
-
+	this.type = settings.type;
  	this.dmg = settings.dmg;
 	this.xd = settings.xd; // x direction, 0 by default means NO side deviations
 }
@@ -405,16 +426,17 @@ var Missile_Entity = function(settings) {
 // bonuses stats
 var bonusesMap = new Map();
 bonusesMap.set(
-	'shield',
+	'civilians',
 	{
 		x: null,
 		y: null,
 		w: 16,
 		h: 16,
-		sx: [2,5],
-		sy: [3,4],
+		sx: [1,4],
+		sy: [1,4],
 		dirMod: 1, // direction modifier : 1 or -1
-		type: 'shield',
+		type: 'civilians',
+		color: 'lightgreen',
 		effectWhenShotAt: 'getHit',
 		effectWhenTouched: 'getHit;doDamage'
 	}

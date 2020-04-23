@@ -13,11 +13,9 @@ http://patorjk.com/software/taag/#p=display&c=c&f=ANSI%20Shadow&t=TODO
  *       ██║   ╚██████╔╝    ██████╔╝╚██████╔╝
  *       ╚═╝    ╚═════╝     ╚═════╝  ╚═════╝ 
 
+explosion animation on enemy (entity?) death
 invincibility after being hit should show
 better health system (check variables.js on PLAYER)
-better CARPET BOMBING (see createCustomMissile(), should use new Missile_Entity() )
-implement Bonus_Entity as well (not done in variables.js, see Missile_Entity() in variables.js for reference)
-thinner hitbox when going sideways
 
 ________________________________________________________________________________
 ________________________________________________________________________________
@@ -30,8 +28,11 @@ ________________________________________________________________________________
  | |__| || |_) || (_| || (_| || |_|  __/\__ \    | || (_) || (_| |
   \____/ | .__/  \__,_| \__,_| \__|\___||___/    |_| \___/  \__, |
          | |                                                 __/ |
-         |_|                                                |___/ 
+		 |_|                                                |___/ 
 
+DONE 16/03: better CARPET BOMBING (see createCustomMissile(), should use new Missile_Entity())
+DONE 15/03: implement Bonus_Entity as well (not done in variables.js, see Missile_Entity() in variables.js for reference)
+DONE 14/03 : player hitbox slightly thinner than image
 DONE 14/03 : adjustable damages (in missile entity)
 DONE 13/03 : collision checks should return booleans
 DONE 12/03: invincible 1s after being hit
@@ -228,6 +229,35 @@ ________________________________________________________________________________
 
     }
 
+	function doEntityExplosion(entity) {
+		let nbFramesCount = entity.explosionSprite.nbFramesCount;
+		let nbFramesPerRow = entity.explosionSprite.nbFramesPerRow;
+		let offsets = {
+			x: 0,
+			y: 0
+		};
+		if(
+			nbFramesCount != 0 
+			&& nbFramesCount % nbFramesPerRow == 0
+		) {
+			offsets.x = 0;
+			offsets.y += entity.explosionSprite.spriteHeight;
+		} else {
+			offsets.x += entity.explosionSprite.spriteWidth;
+		}
+		context.save();
+			context.fillStyle="lime";
+			context.drawImage(
+				entity.explosionSprite, 
+				offsets.x, offsets.y,
+				entity.explosionSprite.spriteWidth, entity.explosionSprite.spriteHeight, 
+				entity.x,  entity.y, 
+				entity.explosionSprite.spriteWidth, entity.explosionSprite.spriteHeight, 
+			);
+		context.restore();
+		entity.explosionSprite.nbFramesCount++;
+		console.log('entity.explosionSprite.nbFramesCount : ', entity.explosionSprite.nbFramesCount);
+	}
 
 
 
@@ -266,42 +296,40 @@ ________________________________________________________________________________
     		break;
     	}
     	missiles.push(missile);
-    	settings.score -= 1;
+    	//settings.score -= 1;
     	statistics.shootCount++;
     }
 
      function createCustomMissile(data) {
-        let customMissile = {
-            type: data.t,
-            x: data.x,
-            y: data.y,
-            xd: data.xd, // -1 angles to left; 1 angles to the right; O does no angle
-            w: data.w,
-            h: data.h,
-            sy: data.sy, // speed Y axis
-            sx: data.sx, // speed Y axis
-            c: data.c,
-            dmg: data.dmg
-        };
-
+    	let customMissile = new Missile_Entity(carpetBombingData);
         missiles.push(customMissile);
      }
 
      // TODO better creation using Entities (see variables.js)
     function createBonus(name) {
-    	let b = bonusesMap.get(name);
+		let b = bonusesMap.get(name);
+		let originLeft = Math.random() < 0.5;
+		let randX = 0;
+		let multiplierSpeedX = 1;
+		if(originLeft) {
+			randX = -(b.w*2);
+		} else {
+			randX = canvas.width + (b.w*2);
+			multiplierSpeedX = -1;
+		}
     	let randY = getRandomInt((-1*(canvas.height/3)), ((canvas.height/3)-b.h));
     	let randSpeedX = getRandomInt(b.sx[0], b.sx[1]);
     	let randSpeedY = getRandomInt(b.sy[0], b.sy[1]);
     	let bonus = {
-    		x: b.w*2,
+    		x: randX,
     		y: randY,
     		w: b.w,
     		h: b.h,
-    		sx: randSpeedX,
+    		sx: randSpeedX * multiplierSpeedX,
     		sy: randSpeedY,
 			dirMod: 1,
     		type: b.type,
+    		color: b.color,
             effectWhenShotAt: b.effectWhenShotAt,
             effectWhenTouched: b.effectWhenTouched
     	};
@@ -312,24 +340,44 @@ ________________________________________________________________________________
 
     function createItem(name) {
     	let itemStats = itemsMap.get(name);
-    	let goRight = Math.random() > 0.5; // the first direction
+    	// let goRight = Math.random() > 0.5; // the first direction
+    	// let randY = getRandomInt((-1*(canvas.height/3)), ((canvas.height/3)-itemStats.h));
+
+    	// // TODO : store these hard value somewhere ?
+    	// // changing spawning side depending on first direction
+    	// let randX = goRight 
+    	// 				? getRandomInt(canvas.width * -0.3, canvas.width * 0.3) 
+		// 				: getRandomInt(canvas.width * 0.6, canvas.width * 1.3);
+
+    	// let randSpeedX = getRandomInt(itemStats.sx[0], itemStats.sx[1]);
+    	// let randSpeedY = getRandomInt(itemStats.sy[0], itemStats.sy[1]);
+
+
+
+
+		// $ $ $ $ $
+
+		let originLeft = Math.random() < 0.5;
+		let randX = 0;
+		let multiplierSpeedX = 1;
+		if(originLeft) {
+			randX = -(itemStats.w*2);
+		} else {
+			randX = canvas.width + (itemStats.w*2);
+			multiplierSpeedX = -1;
+		}
     	let randY = getRandomInt((-1*(canvas.height/3)), ((canvas.height/3)-itemStats.h));
-
-    	// TODO : store these hard value somewhere ?
-    	// changing spawning side depending on first direction
-    	let randX = goRight 
-    					? getRandomInt(canvas.width * -0.3, canvas.width * 0.3) 
-						: getRandomInt(canvas.width * 0.6, canvas.width * 1.3);
-
     	let randSpeedX = getRandomInt(itemStats.sx[0], itemStats.sx[1]);
     	let randSpeedY = getRandomInt(itemStats.sy[0], itemStats.sy[1]);
+
+		// $ $ $ $ $
+
 
     	let item = new Item_Entity(itemStats);
     	item.x = randX;
     	item.y = randY;
-    	item.sx = randSpeedX;
+    	item.sx = randSpeedX * multiplierSpeedX;
     	item.sy = randSpeedY;
-    	item.dirMod = goRight ? 1 : -1;
     	items.push(item);
     }
     function createEnemy() {
@@ -357,9 +405,9 @@ ________________________________________________________________________________
 	function createHomeMenuChoices() {
 		for (let i = 0; i < homeMenuChoices.length; i++) {
 			const choice = homeMenuChoices[i];
-			let missileIndex = checkEntityCollisionWithMissiles_getMissileIndex(choice);
-			if(missileIndex != -1) {
-				missiles.splice(missileIndex,1);
+			let projectileInfo = checkEntityCollisionWithMissiles_getMissileIndex(choice);
+			if(projectileInfo.index != -1) {
+				missiles.splice(projectileInfo.index,1);
 				initGameEntitiesOnGameStart();
 				isOnHomeMenu = false;
 			}
@@ -368,6 +416,9 @@ ________________________________________________________________________________
 		}
 	}
 	function initGameEntitiesOnGameStart() {
+		isEnemiesSpawning = true;
+		isBonusesSpawning = true;
+		isItemsSpawning = true;
 		spawnEnemies();
 		spawnBonuses();
 		spawnItems();
@@ -417,18 +468,29 @@ ________________________________________________________________________________
     		
     		if(
     			(
-    				entity.x < (m.x+m.w)
-    				&& (entity.x+entity.w) > m.x
+					// dead on target
+					entity.x < (m.x+m.w) && (entity.x+entity.w) > m.x 
+					// // hits but overflows on left border
+					// || entity.x < (m.x+m.w) && entity.x > m.x 
+					// // hits but overflows on right border
+					// || (entity.x+entity.w) > m.x && (entity.x+entity.w) < (m.x+m.w) 
     			) 
     			&& (
     				(entity.y+entity.h) >= m.y
     				&& entity.y <= (m.y+m.h)
     			)
     		) {
-    			return mIndex;
+				console.log("m : ", m);
+    			return {
+					'index': mIndex,
+					'projectile': m
+				};
     		}
-    	}
-		return -1;
+		}
+		return {
+			'index': -1,
+			'projectile': null
+		};
     }
     function checkEntityCollisionWithPlayer(entity) {
 		if(
@@ -513,36 +575,46 @@ var relativeSpeedY = 0;
 		bgPositions.d.y = 0;
 		bgPositions.t.y = -canvas.height;
 	}
+	context.save();
     context.fillStyle="black";
     context.fillRect(0,0,canvas.width,canvas.height);
 	context.drawImage(bgs.d, bgPositions.d.x, bgPositions.d.y, canvas.width, canvas.height);
 	context.drawImage(bgs.t, bgPositions.t.x, bgPositions.t.y, canvas.width, canvas.height);
+	context.restore();
 }
 function drawAimSight() {
-	let grd = context.createLinearGradient(pl.x, pl.y, pl.x, pl.y-500);
-	grd.addColorStop(0,"blue");
-	grd.addColorStop(1,"transparent");
-    context.fillStyle=grd;
-    context.fillRect(pl.x + (pl.w/2), 0, 1, pl.y);
+	context.save();
+
+	context.restore();
 }
 function drawBonuses() {
-	context.fillStyle="red";
 	for(let i=0; i<bonuses.length; i++) {
 		let b = bonuses[i];
 		checkBonusOutOfBounds(b,i);
 		animateBonus(b,i);
+		context.save();
+		context.fillStyle = b.color;
 	    context.fillRect(b.x, b.y, b.w, b.h);
+		context.restore();
 		
 		// punish if shooting a bonus ?
-	    /*
-	    missileIndex = checkEntityCollisionWithMissiles_getMissileIndex(b);
-	    if(missileIndex != -1) {
+	    
+	    projectileInfo = checkEntityCollisionWithMissiles_getMissileIndex(b);
+	    if(projectileInfo.index != -1) {
+			missiles.splice(projectileInfo.index,1);
+			bonuses.splice(i,1);
 	    }
-	    */
+	    
 
 	    // picking it up
 	    if(checkEntityCollisionWithPlayer(b)) {
-
+			if(b.effectWhenTouched.indexOf('doDamage') != -1) {
+				addHealth(-20);
+			}
+			if(b.effectWhenTouched.indexOf('getHit') != -1) {
+				settings.score -= 10;
+				bonuses.splice(i,1);
+			}
 	    }
     }
 }
@@ -553,9 +625,10 @@ function drawItems() {
 		checkBonusOutOfBounds(it,i);
 		animateBonus(it,i);
 	    context.fillRect(it.x, it.y, it.w, it.h);
-	    
-	    let missileIndex = checkEntityCollisionWithMissiles_getMissileIndex(it);
-	    if(missileIndex != -1) {
+		
+		
+	    let projectileInfo = checkEntityCollisionWithMissiles_getMissileIndex(it);
+	    if(projectileInfo.index != -1) {
 			if(it.effectWhenShotAt.indexOf('getHit') != -1) {
 				addRage(50);
 				settings.score += it.pts;
@@ -580,39 +653,62 @@ function drawMissiles() {
 	for(let i=0; i<missiles.length; i++) {
 
 		let m = missiles[i];
-		context.fillStyle = m.c;
 		checkMissileOutOfBounds(m,i);
 		animateMissile(m);
-	    context.fillRect(m.x, m.y, m.w, m.h);
+		context.save();
+		context.fillStyle = m.c;
+		context.fillRect(m.x, m.y, m.w, m.h);
+		context.restore();
     }
 }
 function drawEnemies() {
 	for(let i=0; i<enemies.length; i++) {
 		let en = enemies[i];
-		context.fillStyle = en.c;
 		checkEnemyOutOfBounds(en,i);
 		animateEnemy(en);
-
+		if(en.isExploding) {
+			doEntityExplosion(en);
+			if(en.explosionSprite.nbFramesCount == en.explosionSprite.nbFramesTotal) {
+				enemies.splice(i,1);
+			}
+			continue;
+		}
+		// draw one extra frame even if removed
+		context.save();
+		context.fillStyle = en.c;
 	    context.fillRect(en.x, en.y, en.w, en.h);
+		context.restore();
 
 	    // shooting checks
-	    let missileIndex = checkEntityCollisionWithMissiles_getMissileIndex(en);
-	    if(missileIndex != -1) {
-	    	statistics.hitCount++;
+	    let projectileInfo = checkEntityCollisionWithMissiles_getMissileIndex(en);
+	    if(projectileInfo.index != -1) {
+			// should NOT change statistics when other than player shooting
+			if(projectileInfo.projectile.type == 'playerMissile') {
+				statistics.hitCount++;
+			}
 			if(en.effectWhenShotAt.indexOf('getHit') != -1) {
 				addRage(50);
 				settings.score += en.pts;
-				en.hp -= missiles[missileIndex].dmg;
+				en.hp -= missiles[projectileInfo.index].dmg;
 				if(en.hp <= 0) {
 					en.hp = 0;
-					enemies.splice(i,1);
-					statistics.killCount++;
+					en.isExploding = true;
+
+
+					//enemies.splice(i,1);
+					
+
+					// should NOT change statistics when other than player shooting
+					if(projectileInfo.projectile.type == 'playermissile') {
+						statistics.killCount++;
+					}
 				}
-				missiles.splice(missileIndex,1);
+
+				missiles.splice(projectileInfo.index,1);
 				
 			}
 			if(en.effectWhenShotAt.indexOf('blockMissile') != -1) {
-				missiles.splice(missileIndex,1);
+				missiles.splice(projectileInfo.index,1);
 			}
 	    }
 
@@ -628,8 +724,6 @@ function drawEnemies() {
 				addHealth(-40);
 			}
 	    }
-
-	    
     }
 }
 
@@ -700,9 +794,9 @@ function drawPlayer() {
 		pl = adjustForBoundaries(pl);
 	}  
 
+	// draw player
+	context.save();
 	context.fillStyle="lime";
-	//context.fillRect(pl.x, pl.y, pl.w, pl.h);
-
 	context.drawImage(
 		pl.img, 
 		pl.img.startX, pl.img.startY,
@@ -710,12 +804,19 @@ function drawPlayer() {
 		pl.x-4,  pl.y-4, 
 		pl.img.spriteWidth-8, pl.img.spriteHeight
 	);
-
-	// hitbox
+	
+	// draw hitbox
 	context.fillStyle="rgba(20,220,20,0.1)";
     context.fillRect(pl.x, pl.y, pl.w-8, pl.h);
+	
+	// draw crosshair
+	let grd = context.createLinearGradient(pl.x, pl.y, pl.x, pl.y-500);
+	grd.addColorStop(0,"blue");
+	grd.addColorStop(1,"transparent");
+    context.fillStyle=grd;
+	context.fillRect(pl.x + (pl.w/2), 0, 1, pl.y);
 
-	drawAimSight();
+	context.restore();
 }
 
 
@@ -853,7 +954,7 @@ function speedDownPlayer() {
     function spawnBonuses() {
     	if(!isBonusesSpawning) return;
     	if(!btns.pause) {
-    		//createBonus();
+    		createBonus('civilians');
 		}
     	setTimeout(function() {
     		spawnBonuses();
@@ -1032,7 +1133,9 @@ function speedDownPlayer() {
     }
 
     function writeStatistics() {
-
+		document.getElementById('shot').textContent = statistics.shootCount;
+		document.getElementById('hit').textContent = statistics.hitCount;
+		document.getElementById('average').textContent = statistics.hitCount + '%';
     	context.font = '16px consolas';
     	context.fillStyle = "white";
     	context.fillText(('shot: '+ statistics.shootCount), 10, (canvas.height - 10));
@@ -1040,7 +1143,6 @@ function speedDownPlayer() {
     	let average = Math.round((statistics.hitCount*100)/statistics.shootCount);
     	average = isNaN(average) ? 0 : average;
     	context.fillText(('average: '+ average + ' %'), 210, (canvas.height - 10));
-    	
     }
 
     function writeDebug() {

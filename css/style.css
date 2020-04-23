@@ -81,3 +81,10 @@ td.left {
 td.right {
 	text-align: right;
 }
+
+
+#stats {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
