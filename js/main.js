@@ -720,13 +720,15 @@ function drawEnemies() {
 					en.hp = 0;
 					en.isExploding = true;
 
-
-					//enemies.splice(i,1);
-					
-
 					// should NOT change statistics when other than player shooting
-					if(projectileInfo.projectile.type == 'playermissile') {
+					if(projectileInfo.projectile.type == 'playerMissile') {
 						statistics.killCount++;
+						if(
+							enemySpawningTimer > 500
+							&& statistics.killCount %3 == 0
+						) {
+							enemySpawningTimer -= 100;
+						}
 					}
 				}
 
