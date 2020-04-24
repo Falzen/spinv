@@ -229,34 +229,58 @@ ________________________________________________________________________________
 
     }
 
-	function doEntityExplosion(entity) {
-		let nbFramesCount = entity.explosionSprite.nbFramesCount;
-		let nbFramesPerRow = entity.explosionSprite.nbFramesPerRow;
-		let offsets = {
-			x: 0,
-			y: 0
-		};
+	function doEntityExplosion(entity, sprite, shouldLoop) {
+		let nbFramesCount = sprite.nbFramesCount;
+		let nbFramesPerRow = sprite.nbFramesPerRow;
+		let offsets = sprite.offsets;
+		// let skipThisFrameChange = false;
+		// if(
+		// 	sprite.frameDelay != sprite.frameDelayCpt
+		// 	|| sprite.frameDelay != 0
+		// ) {
+		// 	skipThisFrameChange = false;
+		// }
 		if(
-			nbFramesCount != 0 
-			&& nbFramesCount % nbFramesPerRow == 0
+			nbFramesCount != 0
+			&& nbFramesCount != sprite.nbFramesTotal
+			// && !skipThisFrameChange
 		) {
-			offsets.x = 0;
-			offsets.y += entity.explosionSprite.spriteHeight;
-		} else {
-			offsets.x += entity.explosionSprite.spriteWidth;
+			if(nbFramesCount % nbFramesPerRow == 0) {
+				offsets.x = 0;
+				offsets.y += sprite.spriteHeight;
+			} else {
+				offsets.x += sprite.spriteWidth;
+			}
 		}
+		if( // on the last frame
+			shouldLoop
+			&& nbFramesCount == sprite.nbFramesTotal
+		) {
+			sprite.offsets.x = 0;
+			sprite.offsets.y = 0;
+			sprite.nbFramesCount = 0;
+			console.log('reset animation loop');
+		}
+
 		context.save();
 			context.fillStyle="lime";
 			context.drawImage(
-				entity.explosionSprite, 
-				offsets.x, offsets.y,
-				entity.explosionSprite.spriteWidth, entity.explosionSprite.spriteHeight, 
-				entity.x,  entity.y, 
-				entity.explosionSprite.spriteWidth, entity.explosionSprite.spriteHeight, 
+				sprite, 
+				sprite.startX + offsets.x, sprite.startY + offsets.y,
+				sprite.spriteWidth, sprite.spriteHeight, 
+				(entity.x - (sprite.spriteWidth/4)),  entity.y, 
+				sprite.spriteWidth, sprite.spriteHeight, 
 			);
 		context.restore();
-		entity.explosionSprite.nbFramesCount++;
-		console.log('entity.explosionSprite.nbFramesCount : ', entity.explosionSprite.nbFramesCount);
+		sprite.frameDelayCpt++
+		// if(sprite.frameDelay == sprite.frameDelayCpt) {
+		// 	sprite.nbFramesCount++;
+		// 	sprite.frameDelayCpt = 0;
+		// }
+		sprite.nbFramesCount++;
+
+		console.log('sprite.nbFramesCount : ', sprite.nbFramesCount);
+
 	}
 
 
@@ -633,10 +657,10 @@ function drawItems() {
 				addRage(50);
 				settings.score += it.pts;
 				items.splice(i,1);
-				missiles.splice(missileIndex,1);
+				missiles.splice(projectileInfo.index,1);
 			}
 			if(it.effectWhenShotAt.indexOf('blockShot') != -1) {
-				missiles.splice(missileIndex,1);
+				missiles.splice(projectileInfo.index,1);
 			}
 	    }
 	    if(checkEntityCollisionWithPlayer(it)) {
@@ -649,16 +673,17 @@ function drawItems() {
 	    }
     }
 }
+
 function drawMissiles() {
 	for(let i=0; i<missiles.length; i++) {
 
 		let m = missiles[i];
 		checkMissileOutOfBounds(m,i);
 		animateMissile(m);
-		context.save();
-		context.fillStyle = m.c;
-		context.fillRect(m.x, m.y, m.w, m.h);
-		context.restore();
+
+		// 				(@entity, @sprite, @shouldLoop)
+		doEntityExplosion(m, m.shotsSprites[0], true);
+		
     }
 }
 function drawEnemies() {
@@ -667,7 +692,8 @@ function drawEnemies() {
 		checkEnemyOutOfBounds(en,i);
 		animateEnemy(en);
 		if(en.isExploding) {
-			doEntityExplosion(en);
+			// 				(@entity, @sprite, @shouldLoop)
+			doEntityExplosion(en, en.explosionSprite, false);
 			if(en.explosionSprite.nbFramesCount == en.explosionSprite.nbFramesTotal) {
 				enemies.splice(i,1);
 			}
@@ -843,8 +869,8 @@ function drawPlayer() {
      */
      function startFiring() {
     	if(!isFiring) {
-    		firingRate *= 1.1;
-    		firingRate = firingRate > 500 ? 500 : firingRate;
+    		// firingRate *= 1.1;
+    		// firingRate = firingRate > 500 ? 500 : firingRate;
     		isFiring = true;
     		wasFiring = true;
     		createMissile();

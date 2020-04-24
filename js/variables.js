@@ -117,7 +117,8 @@ var playerSettings = {
 		startY: 39,
 		spriteWidth: 39,
 		spriteHeight: 39
-	}
+	},
+
 }
 var Player_Entity = function(settings) {
   	Entity_Template.call(this, settings);
@@ -136,6 +137,7 @@ var Player_Entity = function(settings) {
 	this.img.startY = settings.img.startY;
 	this.img.spriteWidth = settings.img.spriteWidth;
 	this.img.spriteHeight = settings.img.spriteHeight;
+	
 }
 // let myNewPlayer = new Player_Entity(playerSettings);
 
@@ -275,10 +277,19 @@ var standardEnemyStats = {
 
 	explosionSprite: {
 		src: "img/explosion_sprite.png",
-		startX: 0,
+		startX: 0, // where the animation begins in the spritesheet
 		startY: 0,
-		spriteWidth: 64,
-		spriteHeight: 64
+		spriteWidth: 64, // on sprite dimensions
+		spriteHeight: 64,
+		offsets: { // for storing the animation steps
+			x: 0,
+			y: 0
+		},
+		nbFramesCount: 0, // store sprite number to determine the end of the animation
+		nbFramesTotal: 40,
+		nbFramesPerRow: 8, // to evaluate when to increment offsets.y and reset offsets.x
+		frameDelay: 5,
+		frameDelayCpt: 0,
 	}
 
 };
@@ -297,11 +308,14 @@ var Enemy_Entity = function(settings) {
 	this.explosionSprite.src = settings.explosionSprite.src;
 	this.explosionSprite.startX = settings.explosionSprite.startX;
 	this.explosionSprite.startY = settings.explosionSprite.startY;
+	this.explosionSprite.offsets = JSON.parse(JSON.stringify(settings.explosionSprite.offsets));
 	this.explosionSprite.spriteWidth = settings.explosionSprite.spriteWidth;
 	this.explosionSprite.spriteHeight = settings.explosionSprite.spriteHeight;
-	this.explosionSprite.nbFramesCount = 0;
-	this.explosionSprite.nbFramesTotal = 40;
-	this.explosionSprite.nbFramesPerRow = 8;
+	this.explosionSprite.nbFramesCount = settings.explosionSprite.nbFramesCount;
+	this.explosionSprite.nbFramesTotal = settings.explosionSprite.nbFramesTotal;
+	this.explosionSprite.nbFramesPerRow = settings.explosionSprite.nbFramesPerRow;
+	this.explosionSprite.frameDelay = settings.explosionSprite.frameDelay;
+	this.explosionSprite.frameDelayCpt = settings.explosionSprite.frameDelayCpt;
 }
 // let myNewStandardEnemy = new Enemy_Entity(ses);
 
@@ -379,11 +393,31 @@ var carpetBombingData = {
     oy: settings.canvasHeight*1.2,// original Y position
     xd: 0,
     w: 22,
-    h: 22,
+    h: 22, // used to be 22
     sx: 12,
     sy: 8,
     dmg: 10,
-    c: 'blue'
+	c: 'blue',
+	
+	
+	shotsSprites: [
+		{
+			src: "img/carpetbombing_sprite.png",
+			startX: 0, // where the animation begins in the spritesheet
+			startY: 0,
+			spriteWidth: 113, // on sprite dimensions
+			spriteHeight: 128,
+			offsets: { // for storing the animation steps
+				x: 0,
+				y: 0
+			},
+			nbFramesCount: 0, // store sprite number to determine the end of the animation
+			nbFramesTotal: 16,
+			nbFramesPerRow: 4, // to evaluate when to increment offsets.y and reset offsets.x
+			frameDelay: 5,
+			frameDelayCpt: 0
+		}
+	],
 }
 
 // missiles stats
@@ -397,7 +431,26 @@ var mstats = {
 	sx: 0, // speed X axis
 	sy: 14, // speed Y axis
  	dmg: 1,
-	c: 'green'
+	c: 'green',
+	
+	shotsSprites: [
+		{
+			src: "img/shots_sprite.png",
+			startX: 0, // where the animation begins in the spritesheet
+			startY: 0,
+			spriteWidth: 22, // on sprite dimensions
+			spriteHeight: 52,
+			offsets: { // for storing the animation steps
+				x: 0,
+				y: 0
+			},
+			nbFramesCount: 0, // store sprite number to determine the end of the animation
+			nbFramesTotal: 5,
+			nbFramesPerRow: 5, // to evaluate when to increment offsets.y and reset offsets.x
+			frameDelay: 5,
+			frameDelayCpt: 0,
+		}
+	],
 }
 
 var Missile_Entity = function(settings) {
@@ -405,6 +458,23 @@ var Missile_Entity = function(settings) {
 	this.type = settings.type;
  	this.dmg = settings.dmg;
 	this.xd = settings.xd; // x direction, 0 by default means NO side deviations
+
+	this.shotsSprites = [];
+	for(let i=0; i<settings.shotsSprites.length; i++) {
+		let shotAnim = new Image();
+		shotAnim.src = settings.shotsSprites[i].src;
+		shotAnim.startX = settings.shotsSprites[i].startX;
+		shotAnim.startY = settings.shotsSprites[i].startY;
+		shotAnim.offsets = JSON.parse(JSON.stringify(settings.shotsSprites[i].offsets));
+		shotAnim.spriteWidth = settings.shotsSprites[i].spriteWidth;
+		shotAnim.spriteHeight = settings.shotsSprites[i].spriteHeight;
+		shotAnim.nbFramesCount = settings.shotsSprites[i].nbFramesCount;
+		shotAnim.nbFramesTotal = settings.shotsSprites[i].nbFramesTotal;
+		shotAnim.nbFramesPerRow = settings.shotsSprites[i].nbFramesPerRow;
+		shotAnim.frameDelay = settings.shotsSprites[i].frameDelay;
+		shotAnim.frameDelayCpt = settings.shotsSprites[i].frameDelayCpt;
+		this.shotsSprites.push(shotAnim);
+	}
 }
 // let myNewMissile = new Missile_Entity(mstats);
 
