@@ -233,7 +233,7 @@ ________________________________________________________________________________
 		let nbFramesCount = sprite.nbFramesCount;
 		let nbFramesPerRow = sprite.nbFramesPerRow;
 		let offsets = sprite.offsets;
-		// let skipThisFrameChange = false;
+		// let skipThisFrameChange = true;
 		// if(
 		// 	sprite.frameDelay != sprite.frameDelayCpt
 		// 	|| sprite.frameDelay != 0
@@ -261,28 +261,56 @@ ________________________________________________________________________________
 			sprite.nbFramesCount = 0;
 			console.log('reset animation loop');
 		}
-
 		context.save();
-			context.fillStyle="lime";
-			context.drawImage(
-				sprite, 
-				sprite.startX + offsets.x, sprite.startY + offsets.y,
-				sprite.spriteWidth, sprite.spriteHeight, 
-				(entity.x - (sprite.spriteWidth/4)),  entity.y, 
-				sprite.spriteWidth, sprite.spriteHeight, 
-			);
+			adjustAnimationDrawing(entity.type, sprite, entity, offsets);
 		context.restore();
-		sprite.frameDelayCpt++
+		// sprite.frameDelayCpt++
 		// if(sprite.frameDelay == sprite.frameDelayCpt) {
 		// 	sprite.nbFramesCount++;
 		// 	sprite.frameDelayCpt = 0;
 		// }
 		sprite.nbFramesCount++;
-
-		console.log('sprite.nbFramesCount : ', sprite.nbFramesCount);
-
 	}
 
+	function adjustAnimationDrawing(caseName, sprite, entity, offsets) {
+		let biggestDimension;
+		switch(caseName) {
+			case 'playerMissile': 
+			context.fillStyle="lime";
+			context.drawImage(
+				sprite, 
+				sprite.startX + offsets.x, sprite.startY + offsets.y,
+				sprite.spriteWidth, sprite.spriteHeight, 
+				entity.x, entity.y, 
+				entity.w, entity.h
+			);
+			break;
+
+			case 'standardEnemy': 
+			biggestDimension = entity.w > entity.h ? entity.w : entity.h;
+			context.fillStyle="lime";
+			context.drawImage(
+				sprite, 
+				sprite.startX + offsets.x, sprite.startY + offsets.y,
+				sprite.spriteWidth, sprite.spriteHeight, 
+				entity.x, entity.y, 
+				biggestDimension, biggestDimension
+			);
+			break;
+			
+			case 'carpetbombing': 
+			context.fillStyle="lime";
+			biggestDimension = entity.w > entity.h ? entity.w : entity.h;
+			context.drawImage(
+				sprite, 
+				sprite.startX + offsets.x, sprite.startY + offsets.y,
+				sprite.spriteWidth, sprite.spriteHeight, 
+				entity.x, entity.y, 
+				biggestDimension, biggestDimension
+			);
+			break;
+		}
+	}
 
 
 
@@ -829,13 +857,13 @@ function drawPlayer() {
 		pl.img, 
 		pl.img.startX, pl.img.startY,
 		pl.img.spriteWidth, pl.img.spriteHeight, 
-		pl.x-4,  pl.y-4, 
-		pl.img.spriteWidth-8, pl.img.spriteHeight
+		pl.x,  pl.y, 
+		pl.w, pl.h
 	);
 	
 	// draw hitbox
 	context.fillStyle="rgba(20,220,20,0.1)";
-    context.fillRect(pl.x, pl.y, pl.w-8, pl.h);
+    context.fillRect(pl.x, pl.y, pl.w, pl.h);
 	
 	// draw crosshair
 	let grd = context.createLinearGradient(pl.x, pl.y, pl.x, pl.y-500);
@@ -886,15 +914,14 @@ function drawPlayer() {
     	firingRate = 100;
     }
 
-
     function carpetBombing() {
 
         pl.isRageAvailable = false;
             if(!isFiring) {
-                carpetBombingData.y -= carpetBombingData.h*3;
+                carpetBombingData.y -= carpetBombingData.h*1.5;
                 isFiring = true;
                 wasFiring = true;
-                createCustomMissile(carpetBombingData)
+                createCustomMissile(carpetBombingData);
                 //createMissile();
                 carpetbombingTimeout = setTimeout(function() {
                     isFiring = false;

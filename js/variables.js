@@ -92,8 +92,8 @@ var domRageAmount = document.getElementById('rageAmount');
 var playerSettings = {
 	x: settings.canvasWidth/3,
 	y: settings.canvasHeight - 48,
-	w: 39-8, // hitboxMargin*2
-	h: 39-8, // hitboxMargin*2
+	w: 32, // hitboxMargin*2
+	h: 42, // hitboxMargin*2
 	hitboxMargin: 4,
 	ms: 4, // MAX speed
 	sx: 0, // speed x 
@@ -257,6 +257,7 @@ var firingTimeout = null;
  */
 // standardEnemyStats
 var standardEnemyStats = {
+	type: 'standardEnemy',
 	x: 5,
 	ox: 5,
 	y: -72,
@@ -295,7 +296,8 @@ var standardEnemyStats = {
 };
 
 var Enemy_Entity = function(settings) {
-  	Entity_Template.call(this, settings);
+	Entity_Template.call(this, settings);
+	this.type = settings.type;
   	this.ox = settings.ox;
 	this.oy = settings.oy;
 	this.dmg = settings.dmg;
@@ -392,8 +394,8 @@ var carpetBombingData = {
     y: settings.canvasHeight*1.2,
     oy: settings.canvasHeight*1.2,// original Y position
     xd: 0,
-    w: 22,
-    h: 22, // used to be 22
+    w: 52,
+    h: 52, // used to be 22
     sx: 12,
     sy: 8,
     dmg: 10,
@@ -402,21 +404,37 @@ var carpetBombingData = {
 	
 	shotsSprites: [
 		{
-			src: "img/carpetbombing_sprite.png",
+			src: "img/carpet_sprite.png",
 			startX: 0, // where the animation begins in the spritesheet
 			startY: 0,
-			spriteWidth: 113, // on sprite dimensions
-			spriteHeight: 128,
+			spriteWidth: 134, // on sprite dimensions
+			spriteHeight: 134,
 			offsets: { // for storing the animation steps
 				x: 0,
 				y: 0
 			},
 			nbFramesCount: 0, // store sprite number to determine the end of the animation
-			nbFramesTotal: 16,
-			nbFramesPerRow: 4, // to evaluate when to increment offsets.y and reset offsets.x
+			nbFramesTotal: 24,
+			nbFramesPerRow: 6, // to evaluate when to increment offsets.y and reset offsets.x
 			frameDelay: 5,
 			frameDelayCpt: 0
-		}
+		},
+		// {
+		// 	src: "img/carpetbombing_sprite.png",
+		// 	startX: 0, // where the animation begins in the spritesheet
+		// 	startY: 0,
+		// 	spriteWidth: 113, // on sprite dimensions
+		// 	spriteHeight: 128,
+		// 	offsets: { // for storing the animation steps
+		// 		x: 0,
+		// 		y: 0
+		// 	},
+		// 	nbFramesCount: 0, // store sprite number to determine the end of the animation
+		// 	nbFramesTotal: 16,
+		// 	nbFramesPerRow: 4, // to evaluate when to increment offsets.y and reset offsets.x
+		// 	frameDelay: 5,
+		// 	frameDelayCpt: 0
+		// }
 	],
 }
 
@@ -426,8 +444,8 @@ var mstats = {
 	x: null,
 	y: null,
 	xd: 0, // x direction
-	w: 6,
-	h: 6,
+	w: 22,
+	h: 52,
 	sx: 0, // speed X axis
 	sy: 14, // speed Y axis
  	dmg: 1,
