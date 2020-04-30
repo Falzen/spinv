@@ -214,16 +214,16 @@ ________________________________________________________________________________
     }
     function animateEnemy(en) {
     	en.y += en.sy;
+    	en.x += en.sx;
     }
-    function animateBonus(b,indx) {
-    	if(b.type == 'asteroid') {
-    		if(
-    			(b.x+b.w)+b.sx > canvas.width
-    			 || (b.dirMod == -1 && (b.x+b.sx) < 0) // no rebund off the left wall
-			) {
-    			b.dirMod *= -1;
-    		}
-    	}
+    function animateItem(b,indx) {
+		
+		if(
+			(b.dirMod == 1 && (b.x+b.w)+b.sx > canvas.width)
+				|| (b.dirMod == -1 && (b.x+b.sx) < 0) 
+		) {
+			b.dirMod *= -1;
+		}
     	b.y += b.sy;
 		b.x += (b.sx*b.dirMod);
 
@@ -270,6 +270,71 @@ ________________________________________________________________________________
 		// 	sprite.frameDelayCpt = 0;
 		// }
 		sprite.nbFramesCount++;
+	}
+
+	function animatePlayer() {
+		// set position if moving
+		var isOneKeyPressed = false;
+		if(dirs != '') {
+			if(dirs.up) {
+				if(pl.sy > -pl.ms) {
+					pl.sy--;
+				}
+				
+				if(!isOneKeyPressed && pl.img.startY == (pl.img.spriteHeight*2)) {
+					pl.img.startY -= pl.img.spriteHeight;
+				} else if (!isOneKeyPressed) {
+					pl.img.startY += pl.img.spriteHeight;
+				}
+				isOneKeyPressed = true;
+			}
+			if(dirs.down) {
+				if(pl.sy < pl.ms) {
+					pl.sy++;
+				}
+
+				if(!isOneKeyPressed && pl.img.startY == (pl.img.spriteHeight*2)) {
+					pl.img.startY -= pl.img.spriteHeight;
+				} else if (!isOneKeyPressed) {
+					pl.img.startY += pl.img.spriteHeight;
+				}
+				isOneKeyPressed = true;
+			}
+			if(dirs.left) {
+				if(pl.sx > -pl.ms) {
+					pl.sx--;
+				}
+
+				if(!isOneKeyPressed && pl.img.startY == (pl.img.spriteHeight*2)) {
+					pl.img.startY -= pl.img.spriteHeight;
+				} else if (!isOneKeyPressed) {
+					pl.img.startY += pl.img.spriteHeight;
+				}
+				isOneKeyPressed = true;
+				
+				pl.img.startX -= pl.img.spriteWidth;
+			}
+			if(dirs.right) {
+				if(pl.sx < pl.ms) {
+					pl.sx++;
+				}
+
+				if(!isOneKeyPressed && pl.img.startY == (pl.img.spriteHeight*2)) {
+					pl.img.startY -= pl.img.spriteHeight;
+				} else if (!isOneKeyPressed) {
+					pl.img.startY += pl.img.spriteHeight;
+				}
+				isOneKeyPressed = true;
+				
+				pl.img.startX += pl.img.spriteWidth;
+			}
+			pl.sx *= friction;
+			pl.sy *= friction;
+			pl.x += pl.sx
+			pl.y += pl.sy
+
+			pl = adjustPlayerPositionsForBoundaries(pl);
+		}  
 	}
 
 	function adjustAnimationDrawing(caseName, sprite, entity, offsets) {
@@ -369,7 +434,8 @@ ________________________________________________________________________________
 			randX = canvas.width + (b.w*2);
 			multiplierSpeedX = -1;
 		}
-    	let randY = getRandomInt((-1*(canvas.height/3)), ((canvas.height/3)-b.h));
+    	//let randY = getRandomInt((-1*(canvas.height/3)), ((canvas.height/3)-b.h));
+    	let randY = -b.h;
     	let randSpeedX = getRandomInt(b.sx[0], b.sx[1]);
     	let randSpeedY = getRandomInt(b.sy[0], b.sy[1]);
     	let bonus = {
@@ -392,33 +458,19 @@ ________________________________________________________________________________
 
     function createItem(name) {
     	let itemStats = itemsMap.get(name);
-    	// let goRight = Math.random() > 0.5; // the first direction
-    	// let randY = getRandomInt((-1*(canvas.height/3)), ((canvas.height/3)-itemStats.h));
-
-    	// // TODO : store these hard value somewhere ?
-    	// // changing spawning side depending on first direction
-    	// let randX = goRight 
-    	// 				? getRandomInt(canvas.width * -0.3, canvas.width * 0.3) 
-		// 				: getRandomInt(canvas.width * 0.6, canvas.width * 1.3);
-
-    	// let randSpeedX = getRandomInt(itemStats.sx[0], itemStats.sx[1]);
-    	// let randSpeedY = getRandomInt(itemStats.sy[0], itemStats.sy[1]);
-
-
-
-
-		// $ $ $ $ $
 
 		let originLeft = Math.random() < 0.5;
 		let randX = 0;
 		let multiplierSpeedX = 1;
 		if(originLeft) {
-			randX = -(itemStats.w*2);
+			randX = getRandomInt(0, (canvas.width/2));
+			multiplierSpeedX = 1;
 		} else {
-			randX = canvas.width + (itemStats.w*2);
+			randX = getRandomInt((canvas.width/2), canvas.width);
 			multiplierSpeedX = -1;
 		}
-    	let randY = getRandomInt((-1*(canvas.height/3)), ((canvas.height/3)-itemStats.h));
+    	//let randY = getRandomInt((-1*(canvas.height/3)), ((canvas.height/3)-itemStats.h));
+    	let randY = -itemStats.h;
     	let randSpeedX = getRandomInt(itemStats.sx[0], itemStats.sx[1]);
     	let randSpeedY = getRandomInt(itemStats.sy[0], itemStats.sy[1]);
 
@@ -441,40 +493,30 @@ ________________________________________________________________________________
     }
     // used for debugging purposes only
     // static enemy near right bottom corner
-    function createEnemytest() {
+    function createEnemytest(oStats) {
+		let stats = {
+			ox: oStats != null ? (oStats.ox != null ? oStats.ox : canvas.width*0.75) : canvas.width*0.75,
+			x: oStats != null ? (oStats.x != null ? oStats.x : canvas.width*0.75) : canvas.width*0.75,
+			oy: oStats != null ? (oStats.oy != null ? oStats.oy : canvas.height*0.75) : canvas.height*0.75,
+			y: oStats != null ? (oStats.y != null ? oStats.y : canvas.height*0.75) : canvas.height*0.75,
+			w: oStats != null ? (oStats.w != null ? oStats.w : standardEnemyStats.w) : standardEnemyStats.w,
+			h: oStats != null ? (oStats.h != null ? oStats.h : standardEnemyStats.h) : standardEnemyStats.h,
+			sx: oStats != null ? (oStats.sx != null ? oStats.sx : 0) : 0,
+			sy: oStats != null ? (oStats.sy != null ? oStats.sy : 0) : 0
+		}
         var enemy = new Enemy_Entity(standardEnemyStats);
-        enemy.ox = canvas.width*0.75;
-        enemy.x = canvas.width*0.75;
-        enemy.oy = canvas.height*0.75;
-        enemy.y = canvas.height*0.75;
-        enemy.w = standardEnemyStats.w;
-        enemy.h = standardEnemyStats.h;
-        enemy.sx = 0;
-        enemy.sy = 0;
+        enemy.ox = stats.ox;
+        enemy.x = stats.x;
+        enemy.oy = stats.oy;
+        enemy.y = stats.y;
+        enemy.w = stats.w;
+        enemy.h = stats.h;
+        enemy.sx = stats.sx;
+        enemy.sy = stats.sy;
 		enemies.push(enemy);
 	}
 
-	function createHomeMenuChoices() {
-		for (let i = 0; i < homeMenuChoices.length; i++) {
-			const choice = homeMenuChoices[i];
-			let projectileInfo = checkEntityCollisionWithMissiles_getMissileIndex(choice);
-			if(projectileInfo.index != -1) {
-				missiles.splice(projectileInfo.index,1);
-				initGameEntitiesOnGameStart();
-				isOnHomeMenu = false;
-			}
-			drawHomeMenuChoice(choice);
-			
-		}
-	}
-	function initGameEntitiesOnGameStart() {
-		isEnemiesSpawning = true;
-		isBonusesSpawning = true;
-		isItemsSpawning = true;
-		spawnEnemies();
-		spawnBonuses();
-		spawnItems();
-	}
+
 	function drawHomeMenuChoice(choice) {
 		context.save();
 		
@@ -487,6 +529,7 @@ ________________________________________________________________________________
 		context.textBaseline = choice.textBaseline;
 		context.fillText(choice.text, choice.textPos.x, choice.textPos.y); // 1.8 should be 2, small cosmetic adjustment
 		context.restore();
+
 	}
 
 
@@ -566,28 +609,13 @@ ________________________________________________________________________________
     		enemies.splice(indx,1);
     	}
     }
-    function checkBonusOutOfBounds(b, indx) {
+    function checkItemOutOfBounds(b, indx) {
     	if(
     		b.y > canvas.height
     		// || b.x > canvas.width // bouncing against walls
     	) {
-    		bonuses.splice(indx,1);
+    		items.splice(indx,1);
     	}
-    }
-    function adjustForBoundaries(item) {
-    	if(item.x < 0) {
-    		item.x = 0;
-    	} 
-    	else if(item.x > (canvas.width - item.w)) {
-    		item.x = (canvas.width - item.w);
-    	}
-    	if(item.y < 0) {
-    		item.y = 0;
-    	} 
-    	else if(item.y > (canvas.height - item.h)) {
-    		item.y = (canvas.height - item.h);
-    	}
-    	return item;
     }
 
 
@@ -613,15 +641,12 @@ ________________________________________________________________________________
  *    ╚═════╝     ╚═╝  ╚═╝    ╚═╝  ╚═╝     ╚══╝╚══╝     ╚═╝    ╚═╝  ╚═══╝     ╚═════╝     ╚══════╝
  *                                                                                                
  */
-var relativeSpeedY = 0;
- function getPlayerPosY_inPercents() {
- 	return (pl.y * 100) / canvas.height;
- }
+
  function drawScene() {
- 	relativeSpeedY = 1+(1-(getPlayerPosY_inPercents()/95)*1.9);
+ 	bgRelativeSpeedY = 1+(1-(getPlayerPosY_inPercents()/95)*1.9);
  	
-	bgPositions.d.y += settings.backgroundSpeeds.y*relativeSpeedY;
-	bgPositions.t.y += settings.backgroundSpeeds.y*relativeSpeedY;
+	bgPositions.d.y += settings.backgroundSpeeds.y*bgRelativeSpeedY;
+	bgPositions.t.y += settings.backgroundSpeeds.y*bgRelativeSpeedY;
 
 	if(bgPositions.d.y >= canvas.height) {
 		bgPositions.d.y = 0;
@@ -634,48 +659,14 @@ var relativeSpeedY = 0;
 	context.drawImage(bgs.t, bgPositions.t.x, bgPositions.t.y, canvas.width, canvas.height);
 	context.restore();
 }
-function drawAimSight() {
-	context.save();
 
-	context.restore();
-}
-function drawBonuses() {
-	for(let i=0; i<bonuses.length; i++) {
-		let b = bonuses[i];
-		checkBonusOutOfBounds(b,i);
-		animateBonus(b,i);
-		context.save();
-		context.fillStyle = b.color;
-	    context.fillRect(b.x, b.y, b.w, b.h);
-		context.restore();
-		
-		// punish if shooting a bonus ?
-	    
-	    projectileInfo = checkEntityCollisionWithMissiles_getMissileIndex(b);
-	    if(projectileInfo.index != -1) {
-			missiles.splice(projectileInfo.index,1);
-			bonuses.splice(i,1);
-	    }
-	    
-
-	    // picking it up
-	    if(checkEntityCollisionWithPlayer(b)) {
-			if(b.effectWhenTouched.indexOf('doDamage') != -1) {
-				addHealth(-20);
-			}
-			if(b.effectWhenTouched.indexOf('getHit') != -1) {
-				settings.score -= 10;
-				bonuses.splice(i,1);
-			}
-	    }
-    }
-}
 function drawItems() {
-	context.fillStyle="deeppink";
 	for(let i=0; i<items.length; i++) {
 		let it = items[i];
-		checkBonusOutOfBounds(it,i);
-		animateBonus(it,i);
+		checkItemOutOfBounds(it,i);
+		animateItem(it,i);
+		
+		context.fillStyle = it.c;
 	    context.fillRect(it.x, it.y, it.w, it.h);
 		
 		
@@ -786,69 +777,8 @@ function drawEnemies() {
 function drawPlayer() {
 	pl.img.startX = pl.img.spriteWidth;
 	pl.img.startY = 0;
-	// set position if moving
-	var isOneKeyPressed = false;
-	if(dirs != '') {
-
-		if(dirs.up) {
-			if(pl.sy > -pl.ms) {
-				pl.sy--;
-			}
-			
-			if(!isOneKeyPressed && pl.img.startY == (pl.img.spriteHeight*2)) {
-				pl.img.startY -= pl.img.spriteHeight;
-			} else if (!isOneKeyPressed) {
-				pl.img.startY += pl.img.spriteHeight;
-			}
-			isOneKeyPressed = true;
-		}
-		if(dirs.down) {
-			if(pl.sy < pl.ms) {
-				pl.sy++;
-			}
-
-			if(!isOneKeyPressed && pl.img.startY == (pl.img.spriteHeight*2)) {
-				pl.img.startY -= pl.img.spriteHeight;
-			} else if (!isOneKeyPressed) {
-				pl.img.startY += pl.img.spriteHeight;
-			}
-			isOneKeyPressed = true;
-		}
-		if(dirs.left) {
-			if(pl.sx > -pl.ms) {
-				pl.sx--;
-			}
-
-			if(!isOneKeyPressed && pl.img.startY == (pl.img.spriteHeight*2)) {
-				pl.img.startY -= pl.img.spriteHeight;
-			} else if (!isOneKeyPressed) {
-				pl.img.startY += pl.img.spriteHeight;
-			}
-			isOneKeyPressed = true;
-			
-			pl.img.startX -= pl.img.spriteWidth;
-		}
-		if(dirs.right) {
-			if(pl.sx < pl.ms) {
-				pl.sx++;
-			}
-
-			if(!isOneKeyPressed && pl.img.startY == (pl.img.spriteHeight*2)) {
-				pl.img.startY -= pl.img.spriteHeight;
-			} else if (!isOneKeyPressed) {
-				pl.img.startY += pl.img.spriteHeight;
-			}
-			isOneKeyPressed = true;
-			
-			pl.img.startX += pl.img.spriteWidth;
-		}
-		pl.sx *= friction;
-		pl.sy *= friction;
-		pl.x += pl.sx
-		pl.y += pl.sy
-
-		pl = adjustForBoundaries(pl);
-	}  
+	
+	animatePlayer()
 
 	// draw player
 	context.save();
@@ -861,17 +791,26 @@ function drawPlayer() {
 		pl.w, pl.h
 	);
 	
+	drawPlayerHitbox();	
+	drawAimSight();
+	context.restore();
+}
+
+function drawPlayerHitbox() {
+	context.save();
 	// draw hitbox
 	context.fillStyle="rgba(20,220,20,0.1)";
     context.fillRect(pl.x, pl.y, pl.w, pl.h);
-	
+	context.restore();
+}
+function drawAimSight() {
+	context.save();
 	// draw crosshair
 	let grd = context.createLinearGradient(pl.x, pl.y, pl.x, pl.y-500);
 	grd.addColorStop(0,"blue");
 	grd.addColorStop(1,"transparent");
     context.fillStyle=grd;
 	context.fillRect(pl.x + (pl.w/2), 0, 1, pl.y);
-
 	context.restore();
 }
 
@@ -1006,26 +945,26 @@ function speedDownPlayer() {
 
     	}, enemySpawningTimer);
     }
-    function spawnBonuses() {
-    	if(!isBonusesSpawning) return;
-    	if(!btns.pause) {
-    		createBonus('civilians');
-		}
-    	setTimeout(function() {
-    		spawnBonuses();
-
-    	}, bonusSpawningTimer);
-    }
+	
     function spawnItems() {
-    	let tempTimer = getRandomInt(itemsSpawningTimer/2, itemsSpawningTimer*2);
+		spawnItemsCpt++;
+		console.log('spawnItems count : ', spawnItemsCpt);
+    	let tempTimer = getRandomInt(itemsSpawningTimer.min, itemsSpawningTimer.max);
     	if(!isItemsSpawning) return;
     	if(!btns.pause) {
-
-    		createItem('asteroid');
+			for (let [itemName, v] of itemsMap) {
+				let item = itemsMap.get(itemName);
+				if(item.delayCpt == item.delay) {
+					createItem(itemName);
+					item.delayCpt = 0;
+				} else {
+					item.delayCpt++;
+				}
+			}
 		}
     	setTimeout(function() {
     		spawnItems();
-    	}, tempTimer);
+		}, tempTimer);
     }
 
 
@@ -1204,6 +1143,24 @@ function speedDownPlayer() {
     	context.font = '44px consolas';
     	context.fillStyle = "white";
     	context.fillText(('debug: '+ debug), 10, 200);
+	}
+	function getPlayerPosY_inPercents() {
+		return (pl.y * 100) / canvas.height;
+	}
+    function adjustPlayerPositionsForBoundaries(item) {
+    	if(item.x < 0) {
+    		item.x = 0;
+    	} 
+    	else if(item.x > (canvas.width - item.w)) {
+    		item.x = (canvas.width - item.w);
+    	}
+    	if(item.y < 0) {
+    		item.y = 0;
+    	} 
+    	else if(item.y > (canvas.height - item.h)) {
+    		item.y = (canvas.height - item.h);
+    	}
+    	return item;
     }
 
 
@@ -1233,11 +1190,12 @@ function speedDownPlayer() {
 			if(isOnHomeMenu) {
 				createHomeMenuChoices();
 				drawMissiles();
+				drawEnemies();
 				return;
 			}
 	    	drawMissiles();
 	    	drawEnemies();
-	    	drawBonuses();
+	    	//drawBonuses();
 	    	drawItems();
 	    	writeScore();
 	    	writeStatistics();
@@ -1281,14 +1239,35 @@ function speedDownPlayer() {
 
         // init event listeners
         document.addEventListener('keydown',keyPush);
-    	document.addEventListener("keyup", keyLetGo);
-    	// init creation loops
+		document.addEventListener("keyup", keyLetGo);
 		
+    	// init creation loops
 		createHomeMenuChoices();
-        // spawnEnemies();
-        // spawnBonuses();
-    	// spawnItems();
-    }
+	}
+
+	function createHomeMenuChoices() {
+		for (let i = 0; i < homeMenuChoices.length; i++) {
+			const choice = homeMenuChoices[i];
+			let projectileInfo = checkEntityCollisionWithMissiles_getMissileIndex(choice);
+			if(projectileInfo.index != -1) {
+				missiles.splice(projectileInfo.index,1);
+				choice.life --;
+				if(choice.life == 0) {
+					initGameEntitiesOnGameStart();
+					isOnHomeMenu = false;
+				}
+			}
+			drawHomeMenuChoice(choice);
+		}
+	}
+	function initGameEntitiesOnGameStart() {
+		isEnemiesSpawning = true;
+		isBonusesSpawning = true;
+		isItemsSpawning = true;
+		spawnEnemies();
+		//spawnBonuses();
+		spawnItems();
+	}
 
 	function initLateVariables() {
 		
@@ -1296,6 +1275,7 @@ function speedDownPlayer() {
 			{
 				name: 'start',
 				text: 'START',
+				life: 1,
 				x: canvas.width/6,
 				y: canvas.width/6,
 				w: canvas.width/3,
@@ -1308,7 +1288,23 @@ function speedDownPlayer() {
 				textPos: {
 					x: (canvas.width/6 + ((canvas.width/3)/2)), // btnBox.x + (btnBox.w/2)
 					y: (canvas.width/6 + ((canvas.width/6)/1.8)) // btnBox.y + (btnBox.h/1.8)
-				}
+				},
+
 			}
 		];
+		/* "start" choice enemies proteciton :
+		let tempEnemyStats = {
+			x: (canvas.width/6),
+			y: (2*(canvas.width/6)) + 6
+		}
+		createEnemytest(tempEnemyStats);
+		tempEnemyStats.x += 31;
+		createEnemytest(tempEnemyStats);
+		tempEnemyStats.x += 31;
+		createEnemytest(tempEnemyStats);
+		tempEnemyStats.x += 31;
+		createEnemytest(tempEnemyStats);
+		tempEnemyStats.x += 31;
+		createEnemytest(tempEnemyStats);
+		*/
 	}

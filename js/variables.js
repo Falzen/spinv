@@ -37,17 +37,20 @@ var statistics = {
 }
 // engine mechanics
 var updateLoop;
-var friction = 0.89
+var friction = 0.89;
+var bgRelativeSpeedY = 0;
+
 // spawnEnemies
 var isEnemiesSpawning = false;
 var enemySpawningTimer = 800;
 
-// spawnBonuses
-var isBonusesSpawning = false;
-var bonusSpawningTimer = 1200;
 // spawn items
 var isItemsSpawning = false;
-var itemsSpawningTimer = 1200;
+var itemsSpawningTimer = { // 
+	min: 500, 
+	max: 1000
+};
+let spawnItemsCpt = 0; // used to create a frame delay between different items in spawnItems()
 
 var Entity_Template = function(settings) {
 	this.x = settings.x;
@@ -211,7 +214,8 @@ var Player_Entity = function(settings) {
  *    ███████╗██║ ╚████║   ██║   ██║   ██║   ██║███████╗███████║                           
  *    ╚══════╝╚═╝  ╚═══╝   ╚═╝   ╚═╝   ╚═╝   ╚═╝╚══════╝╚══════╝    
  */
- var missiles = [];
+
+var missiles = [];
 var enemies = [];
 var bonuses = [];
 var items = [];
@@ -546,7 +550,7 @@ bonusesMap.set(
  // items stats
 var itemsMap = new Map();
 itemsMap.set(
-	'civilians',
+	'shield',
 	{
 		x: null,
 		y: null,
@@ -554,11 +558,13 @@ itemsMap.set(
 		h: 25,
 		sx: [2,5],
 		sy: [3,4],
-		dirMod: 1, // direction modifier : 1 or -1
-		type: 'civilian',
+		dirMod: 1, // used to bounce off the sides
+		type: 'shield',
+		c: 'lightblue',
 		effectWhenShotAt: 'getHit',
-		effectWhenTouched: 'getHit;doDamage'
-
+		effectWhenTouched: 'getHit;doDamage',
+		delay: 3,
+		delayCpt: 0
 	}
 );
 itemsMap.set(
@@ -570,11 +576,13 @@ itemsMap.set(
 		h: 22,
 		sx: [1,6],
 		sy: [3,4],
-		dirMod: 1, // direction modifier : 1 or -1
+		dirMod: 1, // used to bounce off the sides
 		type: 'asteroid',
+		c: 'deeppink',
 		effectWhenShotAt: 'blockShot',
-		effectWhenTouched: 'doDamage'
-
+		effectWhenTouched: 'doDamage',
+		delay: 0,
+		delayCpt: 0
 	}
 );
 
@@ -584,6 +592,8 @@ var Item_Entity = function(settings) {
 	this.type = settings.type;
 	this.effectWhenShotAt = settings.effectWhenShotAt;
 	this.effectWhenTouched = settings.effectWhenTouched;
+	this.delay = settings.delay;
+	this.delayCpt = settings.delayCpt;
 }
 
 
