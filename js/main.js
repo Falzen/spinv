@@ -738,16 +738,32 @@ function drawEnemies() {
 				if(en.hp <= 0) {
 					en.hp = 0;
 					en.isExploding = true;
-
+/*
+Every 5 kills, 
+	enemySpawningTimer diminishes down to 500ms min.
+	futur enemies min speed and max speed increase
+*/
 					// should NOT change statistics when other than player shooting
 					if(projectileInfo.projectile.type == 'playerMissile') {
 						statistics.killCount++;
-						if(
-							enemySpawningTimer > 500
-							&& statistics.killCount %3 == 0
-						) {
-							enemySpawningTimer -= 100;
+						if(statistics.killCount %5 == 0) {
+							if(enemySpawningTimer > 500) {
+								enemySpawningTimer -= 100;
+							}
+							
+							if(standardEnemyStats.sy.max < 6) {
+								standardEnemyStats.sy.min += 0.2;
+								standardEnemyStats.sy.max += 0.5;
+							}
+							
+							if(
+								enemySpawningTimer > 500
+								|| standardEnemyStats.sy.max < 6
+							) {
+								statistics.currentLevel++;
+							}
 						}
+
 					}
 				}
 
@@ -1130,6 +1146,7 @@ function speedDownPlayer() {
 		document.getElementById('shot').textContent = statistics.shootCount;
 		document.getElementById('hit').textContent = statistics.hitCount;
 		document.getElementById('average').textContent = statistics.hitCount + '%';
+		document.getElementById('level').textContent = statistics.currentLevel;
     	context.font = '16px consolas';
     	context.fillStyle = "white";
     	context.fillText(('shot: '+ statistics.shootCount), 10, (canvas.height - 10));

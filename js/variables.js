@@ -33,7 +33,7 @@ var statistics = {
 	killCount: 0,
 	shootCount: 0,
 	hitCount: 0,
-
+	currentLevel: 1
 }
 // engine mechanics
 var updateLoop;
@@ -47,8 +47,8 @@ var enemySpawningTimer = 800;
 // spawn items
 var isItemsSpawning = false;
 var itemsSpawningTimer = { // 
-	min: 500, 
-	max: 1000
+	min: 1000, 
+	max: 1500
 };
 let spawnItemsCpt = 0; // used to create a frame delay between different items in spawnItems()
 
@@ -98,7 +98,7 @@ var playerSettings = {
 	w: 32, // hitboxMargin*2
 	h: 42, // hitboxMargin*2
 	hitboxMargin: 4,
-	ms: 4, // MAX speed
+	ms: 5, // MAX speed
 	sx: 0, // speed x 
 	sy: 0, // speed y
 
@@ -270,10 +270,13 @@ var standardEnemyStats = {
 	h: 48,
 
 	sx: 0,
-	sy: 1,
+	sy: {
+		min: 1,
+		max: 1
+	},
 	c: 'tomato',
 
-	hp: 2,
+	hp: 1,
 	mHp: 2,
 	dmg: 1,
 	pts: 5,
@@ -304,6 +307,9 @@ var Enemy_Entity = function(settings) {
 	this.type = settings.type;
   	this.ox = settings.ox;
 	this.oy = settings.oy;
+	// overwrite speex Y with random from settings
+	this.sy = getRandomInt(settings.sy.min, settings.sy.max);
+
 	this.dmg = settings.dmg;
 	this.pts = settings.pts;
 	this.effectWhenShotAt = settings.effectWhenShotAt;
